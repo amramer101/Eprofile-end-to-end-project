@@ -7,7 +7,7 @@ resource "aws_security_group" "Frontend-SG" {
   vpc_id      = module.vpc.vpc_id
 
   tags = {
-    Name = "Allow SSH and HTTP"
+    Name = "Frontend-SG"
   }
 }
 
@@ -44,7 +44,7 @@ resource "aws_security_group" "Tomcat-SG" {
   vpc_id      = module.vpc.vpc_id
 
   tags = {
-    Name = "Allow 8080 from Frontend"
+    Name = "Tomcat-SG"
   }
 }
 
@@ -76,11 +76,11 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_tomcat" {
 
 resource "aws_security_group" "Data-SG" {
   name        = "Data-SG"
-  description = "Allow 8080 inbound traffic from Frontend and all outbound traffic"
+  description = "Allow 3306, 11211, 5672 inbound traffic from tomcat and all outbound traffic"
   vpc_id      = module.vpc.vpc_id
 
   tags = {
-    Name = "Allow 8080 from Frontend"
+    Name = "Data-SG"
   }
 }
 
