@@ -8,11 +8,14 @@ module "vpc" {
   private_subnets = var.Private_Subnet_CIDR
   public_subnets  = var.Public_Subnet_CIDR
 
-  enable_nat_gateway = false
-  enable_vpn_gateway = false
+  enable_nat_gateway      = false
+  enable_vpn_gateway      = false
+  map_public_ip_on_launch = true
+  enable_dns_hostnames    = true
+  enable_dns_support      = true
 
   tags = {
-    Terraform = "true"
+    Terraform   = "true"
     Environment = "dev"
   }
 }
