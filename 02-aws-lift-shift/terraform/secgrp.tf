@@ -117,7 +117,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_5672_from_tomcat-SG" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_Data" {
-  security_group_id = aws_security_group.Tomcat-SG.id
+  security_group_id = aws_security_group.Data-SG.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
