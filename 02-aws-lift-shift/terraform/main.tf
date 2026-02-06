@@ -18,7 +18,7 @@ module "ec2_instance_nginx" {
     Environment = "dev"
   }
 
-  user_data = file("../../01-local-setup/Automated-Setup/nginx.sh")
+  user_data = file("../userdata-EC2/nginx.sh")
 
 }
 
@@ -43,7 +43,7 @@ module "ec2_instance_tomcat" {
     Environment = "dev"
   }
 
-  user_data = file("../02-aws-lift-shift/userdata-EC2/nginx.sh")
+  user_data = file("../userdata-EC2/tomcat_ubuntu.sh")
 
 }
 
@@ -68,7 +68,7 @@ module "ec2_instance_rabbitmq" {
     Environment = "dev"
   }
 
-  user_data = file("../../01-local-setup/Automated-Setup/rabbitmq.sh")
+  user_data = file("../userdata-EC2/rabbitmq.sh")
 
 }
 
@@ -92,7 +92,7 @@ module "ec2_instance_memcache" {
     Environment = "dev"
   }
 
-  user_data = file("../../01-local-setup/Automated-Setup/memcache.sh")
+  user_data = file("../userdata-EC2/memcache.sh")
 
 }
 
@@ -117,7 +117,7 @@ module "ec2_instance_mysql" {
     Environment = "dev"
   }
 
-  user_data = file("../../01-local-setup/Automated-Setup/mysql.sh")
+  user_data = file("../userdata-EC2/mysql.sh")
 
 }
 

@@ -8,9 +8,9 @@ output "website_url" {
 output "ssh_commands" {
   description = "Copy these commands to SSH into servers"
   value = {
-    nginx   = "ssh -i ${local_file.private_key.filename} ubuntu@${module.ec2_instance_nginx.public_ip}"
-    tomcat  = "ssh -i ${local_file.private_key.filename} ubuntu@${module.ec2_instance_tomcat.public_ip}"
-    mysql   = "ssh -i ${local_file.private_key.filename} ubuntu@${module.ec2_instance_mysql.public_ip}"
+    nginx  = "ssh -i ${local_file.private_key.filename} ubuntu@${module.ec2_instance_nginx.public_ip}"
+    tomcat = "ssh -i ${local_file.private_key.filename} ubuntu@${module.ec2_instance_tomcat.public_ip}"
+    mysql  = "ssh -i ${local_file.private_key.filename} ubuntu@${module.ec2_instance_mysql.public_ip}"
   }
 }
 
