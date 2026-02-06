@@ -25,7 +25,7 @@ data "aws_iam_policy_document" "s3_access_policy" {
       "s3:ListBucket",
     ]
     resources = [
-      aws_s3_bucket.Atifact-Bucket.arn,
+      aws_s3_bucket.Artifact-Bucket.arn,
       "${aws_s3_bucket.Artifact-Bucket.arn}/*", # Policy requires both bucket and object ARNs
     ]
   }
