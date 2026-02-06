@@ -1,5 +1,7 @@
 ### EC2 Instance for Nginx Server
 
+
+
 module "ec2_instance" {
   source = "terraform-aws-modules/ec2-instance/aws"
 
@@ -33,7 +35,7 @@ module "ec2_instance_tomcat" {
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   ami                         = "ami-01f79b1e4a5c64257" # eu-central-1 ubuntu 20.24.04 LTS
-  vpc_security_group_ids      = [aws_security_group.Backend-SG.id]
+  vpc_security_group_ids      = [aws_security_group.Tomcat-SG.id]
   key_name                    = aws_key_pair.EC2_Key_Pair.key_name
   monitoring                  = false
   subnet_id                   = module.vpc.private_subnets[0]
@@ -58,7 +60,7 @@ module "ec2_instance_rabbitmq" {
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   ami                         = "ami-0532be01f26a3de55" # eu-central-1 AWS Linux 2
-  vpc_security_group_ids      = [aws_security_group.Backend-SG.id]
+  vpc_security_group_ids      = [aws_security_group.Data-SG.id]
   key_name                    = aws_key_pair.EC2_Key_Pair.key_name
   monitoring                  = false
   subnet_id                   = module.vpc.private_subnets[1]
@@ -82,7 +84,7 @@ module "ec2_instance_memcache" {
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   ami                         = "ami-0532be01f26a3de55" # eu-central-1 AWS Linux 2
-  vpc_security_group_ids      = [aws_security_group.Backend-SG.id]
+  vpc_security_group_ids      = [aws_security_group.Data-SG.id]
   key_name                    = aws_key_pair.EC2_Key_Pair.key_name
   monitoring                  = false
   subnet_id                   = module.vpc.private_subnets[2]
@@ -107,7 +109,7 @@ module "ec2_instance_mysql" {
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   ami                         = "ami-0532be01f26a3de55" # eu-central-1 AWS Linux 2
-  vpc_security_group_ids      = [aws_security_group.Backend-SG.id]
+  vpc_security_group_ids      = [aws_security_group.Data-SG.id]
   key_name                    = aws_key_pair.EC2_Key_Pair.key_name
   monitoring                  = false
   subnet_id                   = module.vpc.private_subnets[2]
