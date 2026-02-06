@@ -2,7 +2,6 @@
 
 <div align="center">
 
-![Terraform](media/Terraform.svg)
 
 **Production-Grade Multi-Tier Java Application Migration to AWS Cloud**
 
@@ -25,7 +24,6 @@
 - [Project Structure](#-project-structure)
 - [Deployment Guide](#-deployment-guide)
 - [Key Achievements](#-key-achievements)
-- [Future Enhancements](#-future-enhancements)
 
 ---
 
@@ -417,6 +415,7 @@ resource "aws_route_table" "private" {
   }
 }
 ```
+ ![Terraform](media/Terraform.svg)
 
 ---
 
