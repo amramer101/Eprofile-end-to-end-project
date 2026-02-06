@@ -39,6 +39,8 @@ module "ec2_instance_tomcat" {
   monitoring                  = false
   subnet_id                   = module.vpc.public_subnets[1]
   create_security_group       = false
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
+
 
   tags = {
     Terraform   = "true"
