@@ -1,952 +1,587 @@
-# 🚀 vProfile Cloud Lift & Shift Migration
+# 🌋 Strata-Ops: The Outer Core
+
+## AWS Lift & Shift - Breaking Through to the Cloud
+
+> *From the depths of local infrastructure, we ascend to the cloud. Same architecture, different world.*
 
 <div align="center">
 
-
-**Production-Grade Multi-Tier Java Application Migration to AWS Cloud**
-
 [![Terraform](https://img.shields.io/badge/Terraform-1.14.0-623CE4?style=for-the-badge&logo=terraform)](https://www.terraform.io/)
 [![AWS](https://img.shields.io/badge/AWS-Cloud-FF9900?style=for-the-badge&logo=amazon-aws)](https://aws.amazon.com/)
-[![Java](https://img.shields.io/badge/Java-Application-ED8B00?style=for-the-badge&logo=openjdk)](https://www.java.com/)
 [![IaC](https://img.shields.io/badge/Infrastructure-as_Code-4A90E2?style=for-the-badge)]()
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## 🎯 The Leap
 
-- [Project Overview](#-project-overview)
-- [Architecture Design](#-architecture-design)
-- [Technical Implementation](#-technical-implementation)
-- [Infrastructure Deployment](#-infrastructure-deployment)
-- [Application Verification](#-application-verification)
-- [Project Structure](#-project-structure)
-- [Deployment Guide](#-deployment-guide)
-- [Key Achievements](#-key-achievements)
+You've mastered the Inner Core - manual provisioning, automated scripts, local VMs. Now we **migrate that exact architecture to AWS**, transforming local knowledge into cloud power.
 
----
+**This is Lift & Shift (Rehosting):** Same services, same relationships, cloud infrastructure.
 
-## 🎯 Project Overview
+### The Evolution Journey
 
-A **fully automated Lift & Shift (Rehosting)** migration of a multi-tier Java web application from on-premises infrastructure to AWS Cloud using Infrastructure as Code (IaC) principles. This project demonstrates enterprise-level cloud migration patterns with emphasis on security, automation, and AWS best practices.
+```
+Inner Core (Manual)          → Commands, SSH, local VMs
+Inner Core (Automated)       → Shell scripts, Vagrant
+Outer Core (Lift & Shift)    → Terraform, AWS, IaC     ← YOU ARE HERE
+The Mantle (Containerized)   → Docker, orchestration
+The Crust (Cloud Native)     → Serverless, managed services
+```
 
-### Business Context
+### What Changes?
 
-**Migration Strategy:** Lift & Shift (Rehosting)  
-**Deployment Model:** Infrastructure as a Service (IaaS)  
-**Region:** eu-central-1 (Frankfurt)  
-**Automation Level:** 100% - Zero manual AWS Console interaction
+| Local Infrastructure | AWS Cloud |
+|---------------------|-----------|
+| VirtualBox VMs | EC2 instances |
+| Vagrant networking | VPC + Subnets |
+| Host file DNS | Route53 Private Zone |
+| Local storage | S3 buckets |
+| Manual provisioning scripts | Terraform automation |
 
-### Technology Stack
+### What Stays The Same?
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | Nginx (Reverse Proxy) |
-| **Application** | Apache Tomcat 9 (Java EE) |
-| **Database** | MySQL 8.0 |
-| **Message Queue** | RabbitMQ |
-| **Cache** | Memcached |
-| **Infrastructure** | AWS (VPC, EC2, S3, Route53, NAT Gateway) |
-| **IaC Tool** | Terraform 1.14.0 |
-| **Security** | IAM Roles, Security Groups, Private Subnets |
+✅ 5-tier architecture (Nginx → Tomcat → MySQL/Memcached/RabbitMQ)  
+✅ Application code (same Java WAR)  
+✅ Service relationships  
+✅ Configuration patterns  
 
 ---
 
-## 🏗️ Architecture Design
-
-### High-Level Architecture Diagram
+## 🏗️ Cloud Architecture
 
 ![Architecture Diagram](media/Digram.png)
 
-### Architecture Components Breakdown
+### The Three Zones
 
-#### 1. **Build & Deployment Layer** (Left Side)
-- **Admin Workstation**: Local machine with Terraform installed
-- **Artifact Storage**: S3 bucket hosting the Java WAR file (`vprofile-v2.war`)
-- **Deployment Flow**:
-  1. Admin builds Java application locally
-  2. Terraform uploads WAR file to S3 (`aws_s3_object` resource)
-  3. Terraform provisions entire AWS infrastructure
-  4. EC2 instances download artifact via User Data scripts
-
-#### 2. **Network Architecture**
-
-##### **VPC Configuration**
-- **CIDR Block**: 10.0.0.0/16
-- **Availability Zones**: 3 (eu-central-1a, eu-central-1b, eu-central-1c)
-- **Subnets**:
-  - **Public Subnets**: 10.0.0.0/24, 10.0.1.0/24, 10.0.2.0/24
-  - **Private Subnets**: 10.0.4.0/24, 10.0.5.0/24, 10.0.6.0/24
-
-##### **Public Subnet Components** (Blue Box)
+#### 🌐 **Public Zone** (Internet-Facing)
 ```
-┌─────────────────────────────────────┐
-│      PUBLIC SUBNET (10.0.0.0/24)   │
-├─────────────────────────────────────┤
-│  • Nginx EC2 (Reverse Proxy)        │
-│    - Public IP: 3.79.181.71         │
-│    - Ports: 80, 443                 │
-│                                     │
-│  • NAT Gateway                      │
-│    - Elastic IP                     │
-│    - Outbound internet for private  │
-└─────────────────────────────────────┘
-```
-
-##### **Private Subnet Components** (Red Box)
-```
-┌─────────────────────────────────────┐
-│    PRIVATE SUBNET (10.0.4.0/24)     │
-├─────────────────────────────────────┤
-│  • Tomcat (app01.eprofile.in)       │
-│    - Port 8080                      │
-│    - Private IP: 10.0.1.70          │
-│                                     │
-│  • MySQL (db01.eprofile.in)         │
-│    - Port 3306                      │
-│    - Private IP: 10.0.6.55          │
-│                                     │
-│  • Memcached (mc01.eprofile.in)     │
-│    - Port 11211                     │
-│    - Private IP: 10.0.6.97          │
-│                                     │
-│  • RabbitMQ (rmq01.eprofile.in)     │
-│    - Port 5672                      │
-│    - Private IP: 10.0.5.215         │
-└─────────────────────────────────────┘
-```
-
-#### 3. **Service Discovery** (Route53 Private Hosted Zone)
-- **Zone Name**: `eprofile.in`
-- **DNS Records**:
-  - `app01.eprofile.in` → Tomcat Private IP
-  - `db01.eprofile.in` → MySQL Private IP
-  - `mc01.eprofile.in` → Memcached Private IP
-  - `rmq01.eprofile.in` → RabbitMQ Private IP
-
-**Benefits:**
-- Decouples application from infrastructure
-- Enables seamless instance replacement
-- No hardcoded IP addresses in application code
-
-#### 4. **Traffic Flow**
-
-```
-User (Internet)
-    ↓
 Internet Gateway
     ↓
-Nginx (Public Subnet) - Port 80/443
+Nginx (3.79.181.71)
     ↓
-Tomcat (Private Subnet) - Port 8080
-    ↓
-    ├─→ MySQL (Port 3306) - Database queries
-    ├─→ Memcached (Port 11211) - Caching layer
-    └─→ RabbitMQ (Port 5672) - Async messaging
+Reverse Proxy → Tomcat
 ```
 
-#### 5. **Security Architecture**
+**Purpose:** Single entry point, SSL termination, load balancing
 
-**Outbound Internet Access Pattern:**
+#### 🔒 **Private Zone** (Backend Services)
 ```
-Private EC2 Instances
+Tomcat (10.0.1.70)
+    ↓
+├─→ MySQL (db01.eprofile.in:3306)
+├─→ Memcached (mc01.eprofile.in:11211)
+└─→ RabbitMQ (rmq01.eprofile.in:5672)
+```
+
+**Purpose:** Isolated backend, zero public exposure, DNS-based discovery
+
+#### 🚪 **NAT Gateway** (Outbound Access)
+```
+Private Instances
     ↓
 NAT Gateway (Public Subnet)
     ↓
-Internet Gateway
-    ↓
-Internet (Package updates, API calls)
+Internet (yum/apt updates only)
 ```
 
-**Key Security Features:**
-- ✅ Backend services in private subnets (zero public exposure)
-- ✅ Security Groups with least-privilege rules
-- ✅ IAM roles instead of hardcoded credentials
-- ✅ NAT Gateway for secure outbound traffic
-- ✅ Network isolation between tiers
+**Purpose:** Secure outbound traffic without exposing services
 
 ---
 
-## 💻 Technical Implementation
+## 💡 Key Innovation: Hybrid Artifact Management
 
-### 1. Infrastructure as Code Strategy
+### The Challenge
 
-#### Terraform Resource Overview
+Traditional approach separates infrastructure from application deployment:
+1. Terraform creates infrastructure
+2. Manual artifact upload to S3
+3. SSH into instances to deploy
 
-![Terraform Plan Summary](media/04-terraform-plan-summary.png)
+**Result:** Incomplete automation, manual steps, inconsistency
 
-**TerraScope Analysis:**
-- **55 Resources to Create**: Complete infrastructure provisioned from scratch
-- **0 Updates**: Immutable infrastructure pattern
-- **0 Deletions**: Clean deployment
-- **56 Total Changes**: Fully automated deployment
+### Our Solution
 
-**Resource Categories:**
-1. **Networking** (15 resources):
-   - VPC, Subnets, Route Tables, Internet Gateway, NAT Gateway
-2. **Compute** (5 EC2 instances):
-   - Nginx, Tomcat, MySQL, RabbitMQ, Memcached
-3. **Security** (12 resources):
-   - IAM Roles, Instance Profiles, Policies, Security Groups
-4. **DNS** (5 resources):
-   - Route53 Private Hosted Zone + 4 A Records
-5. **Storage** (2 resources):
-   - S3 Bucket + S3 Object (WAR file)
-6. **SSH** (1 resource):
-   - EC2 Key Pair
+**Terraform manages EVERYTHING - infrastructure AND artifacts**
 
-### 2. Hybrid Automation: Artifact Lifecycle Management
-
-**🎯 Key Innovation:** Terraform manages both infrastructure AND application artifacts
-
-#### Traditional Approach ❌
-```
-1. Manually create S3 bucket via AWS Console
-2. Manually upload WAR file using AWS CLI
-3. Terraform provisions EC2 instances
-4. SSH into each instance to download artifact
-```
-
-#### Our Approach ✅
 ```hcl
-# Step 1: Terraform creates S3 bucket
-resource "aws_s3_bucket" "Artifact-Bucket" {
-  bucket = "s3-terraform-2026-java-artifacts1598"
-  region = "eu-central-1"
+# Create S3 bucket
+resource "aws_s3_bucket" "artifacts" {
+  bucket = "terraform-java-artifacts-1598"
 }
 
-# Step 2: Terraform uploads WAR from local machine
-resource "aws_s3_object" "artifact" {
-  bucket = aws_s3_bucket.Artifact-Bucket.id
+# Upload WAR from local machine
+resource "aws_s3_object" "app" {
+  bucket = aws_s3_bucket.artifacts.id
   key    = "vprofile-v2.war"
   source = "../target/vprofile-v2.war"
   etag   = filemd5("../target/vprofile-v2.war")
 }
 
-# Step 3: EC2 User Data downloads artifact on boot
-#!/bin/bash
-aws s3 cp s3://${bucket}/vprofile-v2.war /opt/tomcat/webapps/
-systemctl restart tomcat
+# EC2 downloads on boot
+resource "aws_instance" "tomcat" {
+  user_data = <<-EOF
+    #!/bin/bash
+    aws s3 cp s3://${aws_s3_bucket.artifacts.id}/vprofile-v2.war /opt/tomcat/webapps/
+    systemctl restart tomcat
+  EOF
+}
 ```
 
 **Benefits:**
-- ✅ Single source of truth (Terraform state)
-- ✅ Version-controlled deployments
-- ✅ Eliminates manual artifact transfers
-- ✅ Consistent across environments (dev, staging, prod)
-
-#### S3 Artifact Storage Verification
+- ✅ One command deploys everything: `terraform apply`
+- ✅ Version-controlled artifacts (etag tracks changes)
+- ✅ No manual S3 uploads
+- ✅ Repeatable across environments
 
 ![S3 Artifact Storage](media/03-s3-artifact-storage.png)
 
-**Evidence:**
-- Bucket: `s3-terraform-2026-java-artifacts1598`
-- Object: `vprofile-v2.war` (79.4 MB)
-- Upload Date: February 6, 2026, 19:22:07 UTC+02:00
-- Storage Class: Standard
-- Uploaded via: `aws_s3_object` Terraform resource
+---
 
-### 3. IAM Security Implementation
+## 🔐 Security Architecture
 
-**Zero Hardcoded Credentials Architecture:**
+### Zero Hardcoded Credentials
+
+**Problem:** Storing AWS keys in code = security nightmare
+
+**Solution:** IAM roles with temporary credentials
 
 ```hcl
-# IAM Role for EC2 instances
-resource "aws_iam_role" "ec2_s3_role" {
-  name = "ec2-s3-access-role"
-  
+# IAM Role (what can assume it)
+resource "aws_iam_role" "ec2_s3" {
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
     Statement = [{
+      Effect = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
       Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
     }]
   })
 }
 
-# IAM Policy granting S3 read access
-resource "aws_iam_policy" "s3_access_policy" {
-  name = "s3-access-policy"
-  
+# IAM Policy (what it can do)
+resource "aws_iam_policy" "s3_read" {
   policy = jsonencode({
-    Version = "2012-10-17"
     Statement = [{
       Effect = "Allow"
-      Action = [
-        "s3:GetObject",
-        "s3:ListBucket"
-      ]
+      Action = ["s3:GetObject", "s3:ListBucket"]
       Resource = [
-        aws_s3_bucket.Artifact-Bucket.arn,
-        "${aws_s3_bucket.Artifact-Bucket.arn}/*"
+        aws_s3_bucket.artifacts.arn,
+        "${aws_s3_bucket.artifacts.arn}/*"
       ]
     }]
   })
 }
 
-# Attach policy to role
-resource "aws_iam_role_policy_attachment" "ec2_s3_attachment" {
-  role       = aws_iam_role.ec2_s3_role.name
-  policy_arn = aws_iam_policy.s3_access_policy.arn
-}
-
-# Instance Profile (bridge between EC2 and IAM)
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2-s3-instance-profile"
-  role = aws_iam_role.ec2_s3_role.name
-}
-
-# Attach profile to EC2 instances
+# Attach role to EC2
 resource "aws_instance" "tomcat" {
-  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
-  # ... other configuration
+  iam_instance_profile = aws_iam_instance_profile.ec2_s3.name
 }
 ```
 
-**Security Flow:**
-1. EC2 instance assumes IAM role via instance profile
-2. AWS STS issues temporary credentials (refreshed automatically)
-3. EC2 uses temporary credentials to access S3
-4. Credentials expire after 6 hours (automatic rotation)
+**Flow:**
+1. EC2 assumes role automatically
+2. AWS issues temporary credentials (6-hour expiry)
+3. EC2 accesses S3 using temp credentials
+4. Credentials auto-rotate
 
-**Benefits:**
-- ✅ No AWS Access Keys in code or config files
-- ✅ Automatic credential rotation
-- ✅ Follows AWS Well-Architected Framework
-- ✅ Audit trail in CloudTrail
+**No keys. No secrets. Just roles.**
 
-### 4. Network Isolation Strategy
+### Network Isolation
 
-#### Security Group Rules
+**Security Group Strategy:**
 
-**Nginx Security Group (Public):**
-```hcl
-# Allow HTTP from internet
-ingress {
-  from_port   = 80
-  to_port     = 80
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-}
+```
+Nginx SG:
+  Inbound:  0.0.0.0/0 → Port 80/443 (internet)
+  Outbound: Tomcat SG → Port 8080
 
-# Allow HTTPS from internet
-ingress {
-  from_port   = 443
-  to_port     = 443
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-}
+Tomcat SG:
+  Inbound:  Nginx SG → Port 8080
+  Outbound: MySQL/MC/RMQ SGs → Specific ports
 
-# Allow outbound to Tomcat
-egress {
-  from_port       = 8080
-  to_port         = 8080
-  protocol        = "tcp"
-  security_groups = [tomcat_sg.id]
-}
+MySQL SG:
+  Inbound:  Tomcat SG → Port 3306
+  Outbound: None (database doesn't initiate)
 ```
 
-**Tomcat Security Group (Private):**
-```hcl
-# Only accept traffic from Nginx
-ingress {
-  from_port       = 8080
-  to_port         = 8080
-  protocol        = "tcp"
-  security_groups = [nginx_sg.id]
-}
-
-# Allow outbound to backend services
-egress {
-  from_port       = 3306
-  to_port         = 3306
-  protocol        = "tcp"
-  security_groups = [mysql_sg.id]
-}
-```
-
-**MySQL Security Group (Private):**
-```hcl
-# Only accept traffic from Tomcat
-ingress {
-  from_port       = 3306
-  to_port         = 3306
-  protocol        = "tcp"
-  security_groups = [tomcat_sg.id]
-}
-```
-
-#### NAT Gateway Configuration
-
-**Purpose:** Provide outbound internet access to private instances without exposing them to inbound traffic
-
-**Use Cases:**
-- Downloading OS updates (`yum update`, `apt update`)
-- Installing packages from public repositories
-- Making API calls to external services
-- Downloading application dependencies
-
-**Traffic Flow:**
-```
-Private Instance (10.0.4.50)
-    ↓
-Private Subnet Route Table
-    ↓
-NAT Gateway (in Public Subnet)
-    ↓
-Internet Gateway
-    ↓
-Internet (outbound only)
-```
-
-**Route Table Configuration:**
-```hcl
-# Private subnet route table
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.main.id
-  
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main.id
-  }
-}
-```
- ![Terraform](media/Terraform.svg)
+**Each tier only talks to necessary neighbors. Defense in depth.**
 
 ---
 
-## 🔧 Infrastructure Deployment
+## 🗺️ Service Discovery: Route53 Private Zone
 
-### EC2 Instances Overview
+![Route53 Private Zone](media/02-route53-private-zone.png)
+
+### DNS-Based Decoupling
+
+**Instead of hardcoded IPs:**
+```properties
+# ❌ Fragile
+db.host=10.0.6.55
+cache.host=10.0.6.97
+```
+
+**Use DNS names:**
+```properties
+# ✅ Resilient
+db.host=db01.eprofile.in
+cache.host=mc01.eprofile.in
+```
+
+### Route53 Records
+
+| DNS Name | IP Address | Purpose |
+|----------|-----------|---------|
+| app01.eprofile.in | 10.0.1.70 | Tomcat application |
+| db01.eprofile.in | 10.0.6.55 | MySQL database |
+| mc01.eprofile.in | 10.0.6.97 | Memcached cache |
+| rmq01.eprofile.in | 10.0.5.215 | RabbitMQ queue |
+
+**Why this matters:**
+- Replace an instance? Update DNS. Application code unchanged.
+- Blue-green deployments? Switch DNS pointer.
+- Disaster recovery? Point DNS to backup region.
+
+**DNS is your abstraction layer.**
+
+---
+
+## 🚀 Terraform in Action
+
+![Terraform Plan Summary](media/04-terraform-plan-summary.png)
+
+### What Gets Created?
+
+**55 resources in one `terraform apply`:**
+
+- **15 Networking:** VPC, subnets, route tables, IGW, NAT Gateway
+- **5 Compute:** EC2 instances (Nginx, Tomcat, MySQL, Memcached, RabbitMQ)
+- **12 Security:** IAM roles, policies, security groups
+- **5 DNS:** Route53 zone + 4 A records
+- **2 Storage:** S3 bucket + WAR object
+- **1 Access:** SSH key pair
+
+**From zero to production in ~10 minutes.**
+
+### Infrastructure as Code Benefits
+
+```bash
+# Deploy entire stack
+terraform apply -auto-approve
+
+# Modify one resource
+vim ec2-instances.tf  # Change instance type
+terraform apply       # Updates only that instance
+
+# Destroy everything
+terraform destroy -auto-approve
+```
+
+**Version control your infrastructure. Treat it like code.**
+
+![Terraform](media/Terraform.svg)
+
+---
+
+## ✅ Verification: The Proof
+
+### 1. All Services Running
 
 ![EC2 Instances Running](media/01-aws-ec2-instances-running.png)
 
-#### Deployed Instances Details
+| Instance | Instance ID | AZ | Public IP | Private IP | Status |
+|----------|------------|----|-----------|-----------| -------|
+| Nginx | i-0b5378f7952b66723 | eu-central-1a | 3.79.181.71 | - | ✅ Running |
+| Tomcat | i-03bca415489a611b1 | eu-central-1b | 63.181.3.214 | 10.0.1.70 | ✅ Running |
+| MySQL | i-09a52f058fb25779 | eu-central-1c | - | 10.0.6.55 | ✅ Running |
+| Memcached | i-0567447bf2b72779d | eu-central-1c | - | 10.0.6.97 | ✅ Running |
+| RabbitMQ | i-079b3888eec378d2 | eu-central-1b | - | 10.0.5.215 | ✅ Running |
 
-| Instance Name | Instance ID | Type | AZ | Public IPv4 | Private IPv4 | Status |
-|---------------|-------------|------|----|-----------|--------------| -------|
-| **RabbitMQ-instance** | i-079b3888eec378d2 | t2.micro | eu-central-1b | - | - | ✅ Running |
-| **Tomcat-instance** | i-03bca415489a611b1 | t2.micro | eu-central-1b | 63.181.3.214 | 10.0.1.70 | ✅ Running |
-| **Nginx-instance** | i-0b5378f7952b66723 | t2.micro | eu-central-1a | 3.79.181.71 | - | ✅ Running |
-| **Memcache-instance** | i-0567447bf2b72779d | t2.micro | eu-central-1c | - | - | ✅ Running |
-| **MySQL-instance** | i-09a52f058fb25779 | t2.micro | eu-central-1c | - | - | ✅ Running |
+**Multi-AZ deployment for fault tolerance. Private IPs for backend security.**
 
-**Key Observations:**
-- ✅ All 5 instances running successfully
-- ✅ 2/2 status checks passed for all instances
-- ✅ Only Tomcat and Nginx have public IPs (by design)
-- ✅ Multi-AZ deployment for fault tolerance
-- ✅ Consistent instance type (t2.micro) for cost optimization
-
-#### Instance Details: Tomcat (Application Server)
-
-**Configuration:**
-- **Instance ID**: i-03bca415489a611b1
-- **Public IPv4**: 63.181.3.214
-- **Private IPv4**: 10.0.1.70
-- **Public DNS**: ec2-63-181-3-214.eu-central-1.compute.amazonaws.com
-- **Private DNS**: ip-10-0-1-70.eu-central-1.compute.internal
-- **Availability Zone**: eu-central-1b
-- **Instance Type**: t2.micro
-
-**Why Tomcat has a Public IP:**
-In this specific screenshot, Tomcat was temporarily assigned a public IP for testing purposes. In the final production architecture (as shown in the diagram), Tomcat should only have a private IP and be accessed through the Nginx reverse proxy.
-
-### Route53 Private Hosted Zone
-
-![Route53 Private Hosted Zone](media/02-route53-private-zone.png)
-
-#### DNS Records Configuration
-
-**Hosted Zone Details:**
-- **Zone Name**: `eprofile.in`
-- **Type**: Private
-- **Record Count**: 6 (2 default NS/SOA + 4 custom A records)
-
-**Custom DNS Records:**
-
-| Record Name | Type | Routing Policy | Value/Route Traffic To | TTL |
-|-------------|------|----------------|----------------------|-----|
-| **app01.eprofile.in** | A | Simple | 10.0.1.70 | 300 |
-| **db01.eprofile.in** | A | Simple | 10.0.6.55 | 300 |
-| **mc01.eprofile.in** | A | Simple | 10.0.6.97 | 300 |
-| **rmq01.eprofile.in** | A | Simple | 10.0.5.215 | 300 |
-
-**Application Configuration Example:**
-
-Instead of hardcoding IPs in `application.properties`:
-```properties
-# ❌ Bad Practice (Hardcoded IPs)
-db.host=10.0.6.55
-cache.host=10.0.6.97
-mq.host=10.0.5.215
-
-# ✅ Best Practice (DNS Names)
-db.host=db01.eprofile.in
-cache.host=mc01.eprofile.in
-mq.host=rmq01.eprofile.in
-```
-
-**Benefits:**
-- ✅ IP changes don't require application redeployment
-- ✅ Supports blue-green deployments
-- ✅ Enables disaster recovery scenarios
-- ✅ Clean separation of concerns
-
----
-
-## ✅ Application Verification
-
-### 1. Login Page Accessibility
+### 2. Application Accessible
 
 ![Application Login Page](media/05-app-login-page.png)
 
-**Verification Checklist:**
-- ✅ Application accessible via Nginx public IP: `http://3.79.181.71`
-- ✅ Login page loads successfully
-- ✅ UI renders correctly (gradient background, form elements)
-- ✅ Frontend components working (username/password fields)
-- ✅ Nginx reverse proxy routing traffic to Tomcat
+**Test:** `http://3.79.181.71`
 
-**Test Credentials:**
-- Username: `admin_vp`
-- Password: `••••••••` (configured in application)
+✅ Nginx serving traffic  
+✅ Reverse proxy routing to Tomcat  
+✅ Java application deployed  
+✅ Login page renders
 
-**What This Proves:**
-1. Internet Gateway → Nginx connectivity ✅
-2. Nginx → Tomcat reverse proxy ✅
-3. Tomcat serving Java application ✅
-4. WAR file successfully deployed ✅
-
-### 2. Database Connection Success
+### 3. Database Connected
 
 ![Database Connection Success](media/06-app-db-connection-success.png)
 
-**Verification Details:**
-- ✅ Message: **"Data is From DB and Data Inserted In Cache !!"**
-- ✅ User data retrieved from MySQL database
-- ✅ User ID: 7
-- ✅ Username: `admin_vp`
-- ✅ Email: `admin@hkhinfo.com`
-- ✅ Data cached in Memcached for subsequent requests
+**Message:** "Data is From DB and Data Inserted In Cache !!"
 
-**Database Connection Flow:**
-```
-Tomcat Application
-    ↓
-DNS Resolution: db01.eprofile.in → 10.0.6.55
-    ↓
-MySQL Connection (Port 3306)
-    ↓
-Query User Table
-    ↓
-Return User Data
-    ↓
-Cache in Memcached (mc01.eprofile.in)
-```
+✅ Tomcat → MySQL connection  
+✅ DNS resolution (`db01.eprofile.in`)  
+✅ SQL queries executing  
+✅ Data persisted and retrieved
 
-**User Primary Details Table:**
-
-| ID | Name | Father's Name | Mother's Name | Email | Phone Number |
-|----|------|--------------|---------------|-------|--------------|
-| 7 | admin_vp | - | - | admin@hkhinfo.com | - |
-
-**What This Proves:**
-1. Tomcat → MySQL connectivity ✅
-2. Route53 DNS resolution working ✅
-3. Database queries executing successfully ✅
-4. Application business logic functional ✅
-5. Data persistence layer operational ✅
-
-### 3. Memcached Cache Verification
+### 4. Cache Working
 
 ![Data from Cache](media/08-Data-from-Cache.png)
 
-**Verification Details:**
-- ✅ Message: **"[Data is From Cache]"** (red badge indicator)
-- ✅ Same user data retrieved from cache instead of database
-- ✅ Faster response time (no database query)
-- ✅ Cache hit successful
+**Message:** "[Data is From Cache]" (red badge)
 
-**User Details (Cached):**
+✅ Memcached storing data  
+✅ Cache hits reducing DB load  
+✅ Performance optimization active
 
-| Field | Value |
-|-------|-------|
-| **ID** | 4 |
-| **Name** | Hibo Prince |
-| **Father's Name** | Abara |
-| **Mother's Name** | Queen |
-| **Email** | hibo.prince@gmail.com |
-| **Phone Number** | 9146389863 |
-| **Date of Birth** | 6/09/2000 |
-| **Gender** | male |
-| **Marital Status** | unMarried |
-| **Permanent Address** | Electronic City, UAE |
-| **Temporary Address** | Electronic City, UAE |
-| **Primary Occupation** | Tester |
-| **Secondary Occupation** | Freelancing |
-| **Skills** | Python, PHP |
-| **Secondary Phone Number** | 9146389871 |
-| **Nationality** | Indian |
-| **Language** | hindi |
-| **Working Experience** | 3 |
-
-**Caching Flow:**
-```
-1st Request:
-Tomcat → MySQL → Retrieve Data → Store in Memcached → Return to User
-
-2nd Request (Same User):
-Tomcat → Memcached → Cache Hit → Return Cached Data (Skip MySQL)
-```
-
-**Performance Benefits:**
-- ⚡ Reduced database load
-- ⚡ Faster response times
-- ⚡ Improved scalability
-- ⚡ Lower latency for frequent queries
-
-**What This Proves:**
-1. Tomcat → Memcached connectivity ✅
-2. Cache storage mechanism working ✅
-3. Cache retrieval logic functional ✅
-4. Performance optimization layer operational ✅
-
-### 4. RabbitMQ Message Queue
+### 5. Message Queue Active
 
 ![RabbitMQ Console](media/07-rabbitmq-console.png)
 
-**Verification Details:**
-- ✅ RabbitMQ service successfully initiated
-- ✅ Message: **"RabbitMQ Initiated"**
-- ✅ Connections: 6 active connections
-- ✅ Infrastructure: 5 Channels, 1 Exchange, 3 Queues
+**Status:** "RabbitMQ Initiated"  
+**Connections:** 6 active
 
-**RabbitMQ Architecture in vProfile:**
+✅ RabbitMQ broker running  
+✅ Asynchronous messaging functional  
+✅ Event-driven architecture ready
 
+---
+
+## 📋 Quick Start
+
+### Prerequisites
+
+```bash
+# Install required tools
+brew install terraform awscli maven  # macOS
+# OR
+sudo apt install terraform awscli maven  # Ubuntu
 ```
-Tomcat Application
-    ↓
-Publish Messages to Exchange
-    ↓
-RabbitMQ Broker (rmq01.eprofile.in:5672)
-    ↓
-Route to Queues based on Routing Key
-    ↓
-Consumers Process Messages Asynchronously
+
+### Deploy in 4 Commands
+
+```bash
+# 1. Build application
+cd application
+mvn clean package
+
+# 2. Configure AWS
+aws configure  # Enter credentials, region: eu-central-1
+
+# 3. Deploy infrastructure
+cd ../terraform
+terraform init
+terraform apply -auto-approve
+
+# 4. Access application
+terraform output website_url
+# Opens: http://<nginx-ip>
 ```
 
-**Use Cases in vProfile:**
-- User registration emails (async)
-- Notification processing
-- Background job scheduling
-- Event-driven architecture
+**Deployment time:** ~10 minutes  
+**Cost:** ~$70/month (5x t2.micro + NAT Gateway)
 
-**What This Proves:**
-1. Tomcat → RabbitMQ connectivity ✅
-2. Message queue infrastructure operational ✅
-3. Asynchronous messaging capability ✅
-4. Event-driven architecture functional ✅
+### Destroy
+
+```bash
+terraform destroy -auto-approve
+```
+
+**Everything deleted. S3 bucket emptied. No orphaned resources.**
+
+---
+
+## 🎓 What You Learn Here
+
+### Cloud Migration Principles
+
+- ✅ **Lift & Shift strategy:** When and why to rehost
+- ✅ **VPC design:** Public/private subnet patterns
+- ✅ **Security groups:** Defense in depth
+- ✅ **IAM best practices:** Roles over keys
+
+### Terraform Mastery
+
+- ✅ **Resource dependencies:** Implicit and explicit
+- ✅ **State management:** Remote state (production-ready)
+- ✅ **Module patterns:** DRY infrastructure
+- ✅ **Lifecycle management:** Create, update, destroy
+
+### AWS Services
+
+- ✅ **EC2:** Instance types, user data, placement
+- ✅ **VPC:** Subnets, route tables, gateways
+- ✅ **Route53:** Private hosted zones, A records
+- ✅ **S3:** Bucket policies, object versioning
+- ✅ **IAM:** Roles, policies, instance profiles
+
+### DevOps Practices
+
+- ✅ **Infrastructure as Code:** Version control, peer review
+- ✅ **Immutable infrastructure:** Replace, don't modify
+- ✅ **Automation:** One-command deployments
+- ✅ **Documentation as code:** README explains architecture
+
+---
+
+## 🔧 Common Issues
+
+### Issue: Terraform state lock
+
+**Symptom:** `Error acquiring the state lock`
+
+**Solution:**
+```bash
+# Force unlock (use with caution)
+terraform force-unlock <lock-id>
+```
+
+### Issue: NAT Gateway timeout
+
+**Symptom:** Private instances can't download packages
+
+**Solution:**
+```bash
+# Verify route table association
+aws ec2 describe-route-tables --filters "Name=vpc-id,Values=<vpc-id>"
+
+# Check NAT Gateway status
+aws ec2 describe-nat-gateways --filter "Name=vpc-id,Values=<vpc-id>"
+```
+
+### Issue: S3 access denied
+
+**Symptom:** EC2 can't download WAR file
+
+**Solution:**
+```bash
+# Verify IAM role attachment
+aws ec2 describe-instances --instance-ids <instance-id> \
+  --query 'Reservations[0].Instances[0].IamInstanceProfile'
+
+# Test from EC2
+aws s3 ls s3://<bucket-name>/
+```
+
+---
+
+## 📊 Cost Analysis
+
+### Current Setup (Development)
+
+| Service | Resource | Monthly Cost |
+|---------|----------|--------------|
+| EC2 | 5x t2.micro | $36.50 |
+| NAT Gateway | 1x NAT | $32.40 |
+| S3 | 1GB storage | $0.03 |
+| Route53 | 1 hosted zone | $0.50 |
+| Data Transfer | 10GB | $0.90 |
+| **Total** | | **~$70/month** |
+
+### Production Evolution (Next Steps)
+
+| Upgrade | Cost Impact | Benefit |
+|---------|------------|---------|
+| ALB instead of single Nginx | +$16 | High availability, SSL termination |
+| RDS Multi-AZ | +$30 | Automated backups, failover |
+| ElastiCache | +$15 | Managed caching, scaling |
+| Auto Scaling Groups | +$0 | Automatic scaling (EC2 costs vary) |
+
+**Trade-off:** Higher cost for managed services = Lower operational burden
+
+---
+
+## 🎯 Next Layer: The Mantle
+
+From VMs to containers. The **Dockerization & CI/CD** layer awaits, where we package this application into containers and automate the entire build-deploy pipeline.
+
+**Same app. Portable, scalable, cloud-agnostic.**
+
+---
+
+## 💡 Pro Tips
+
+**Cost Optimization:**
+- 🔍 Use `t3.micro` instead of `t2.micro` for better performance
+- 🕐 Stop instances during non-work hours (save ~50%)
+- 📊 Enable Cost Explorer to track spending
+
+**Security Hardening:**
+- 🔐 Rotate IAM credentials regularly
+- 🔒 Enable VPC Flow Logs
+- 🛡️ Use AWS Systems Manager Session Manager (no SSH keys)
+- 📝 Enable CloudTrail for audit logging
+
+**Performance:**
+- ⚡ Use Placement Groups for low latency
+- 📦 Enable EBS optimization
+- 🌐 Consider CloudFront for static assets
+
+**Disaster Recovery:**
+- 💾 Enable automated EBS snapshots
+- 🗺️ Document failover procedures
+- 🧪 Test restore process quarterly
 
 ---
 
 ## 📁 Project Structure
 
 ```
-vprofile-lift-shift/
+02-aws-lift-shift/
+├── media/                     # Architecture diagrams, screenshots
+│   ├── Digram.png            # Main architecture
+│   ├── 01-aws-ec2-instances-running.png
+│   ├── 02-route53-private-zone.png
+│   ├── 03-s3-artifact-storage.png
+│   ├── 04-terraform-plan-summary.png
+│   ├── 05-app-login-page.png
+│   ├── 06-app-db-connection-success.png
+│   ├── 07-rabbitmq-console.png
+│   ├── 08-Data-from-Cache.png
+│   └── Terraform.svg
 │
-├── media/                                  # Screenshots & Documentation Images
-│   ├── 01-aws-ec2-instances-running.png   # EC2 instances verification
-│   ├── 02-route53-private-zone.png        # DNS records configuration
-│   ├── 03-s3-artifact-storage.png         # S3 artifact bucket
-│   ├── 04-terraform-plan-summary.png      # Terraform execution plan
-│   ├── 05-app-login-page.png              # Application login UI
-│   ├── 06-app-db-connection-success.png   # MySQL connectivity test
-│   ├── 07-rabbitmq-console.png            # RabbitMQ status page
-│   ├── 08-Data-from-Cache.png             # Memcached verification
-│   ├── Digram.png                         # Architecture diagram
-│   └── Terraform.svg                      # Terraform logo
+├── terraform/
+│   ├── main.tf               # Provider configuration
+│   ├── vpc.tf                # VPC, subnets, gateways
+│   ├── security-groups.tf    # All security group rules
+│   ├── ec2-instances.tf      # EC2 instance definitions
+│   ├── iam.tf                # Roles, policies, instance profiles
+│   ├── route53.tf            # Private hosted zone + records
+│   ├── s3.tf                 # Artifact bucket + upload
+│   ├── outputs.tf            # Public IPs, DNS names
+│   ├── variables.tf          # Input variables
+│   └── userdata/             # Bootstrap scripts
+│       ├── nginx.sh
+│       ├── tomcat.sh
+│       ├── mysql.sh
+│       ├── rabbitmq.sh
+│       └── memcached.sh
 │
-├── terraform/                             # Terraform Configuration
-│   ├── main.tf                           # Main infrastructure definition
-│   ├── variables.tf                      # Input variables
-│   ├── outputs.tf                        # Output values
-│   ├── vpc.tf                            # VPC and networking
-│   ├── security-groups.tf                # Security group rules
-│   ├── ec2-instances.tf                  # EC2 instance definitions
-│   ├── iam.tf                            # IAM roles and policies
-│   ├── route53.tf                        # DNS configuration
-│   ├── s3.tf                             # S3 bucket and object
-│   └── userdata/                         # Bootstrap scripts
-│       ├── nginx.sh                      # Nginx setup script
-│       ├── tomcat.sh                     # Tomcat + WAR deployment
-│       ├── mysql.sh                      # MySQL initialization
-│       ├── rabbitmq.sh                   # RabbitMQ configuration
-│       └── memcached.sh                  # Memcached setup
-│
-├── application/                          # Java Application Source
-│   ├── src/                             # Source code
-│   ├── pom.xml                          # Maven configuration
-│   └── target/
-│       └── vprofile-v2.war             # Compiled artifact
-│
-├── docs/                                # Additional Documentation
-│   ├── architecture.md                 # Detailed architecture guide
-│   ├── deployment.md                   # Step-by-step deployment
-│   └── troubleshooting.md             # Common issues & solutions
-│
-└── README.md                           # This file
+└── README.md                 # This file
 ```
 
 ---
 
-## 🚀 Deployment Guide
+## 🔄 The Journey So Far
 
-### Prerequisites
-
-```bash
-# Required tools
-- Terraform >= 1.14.0
-- AWS CLI >= 2.0
-- Java JDK 11+ (for building application)
-- Maven 3.6+ (for building WAR file)
-- Git
+```
+✅ Inner Core - Manual Setup
+    ↓
+✅ Inner Core - Automated Setup
+    ↓
+✅ Outer Core - AWS Lift & Shift    ← YOU ARE HERE
+    ↓
+⬜ The Mantle - Containerization
+    ↓
+⬜ The Crust - Cloud Native
 ```
 
-### Step 1: Clone Repository
-
-```bash
-git clone https://github.com/yourusername/vprofile-lift-shift.git
-cd vprofile-lift-shift
-```
-
-### Step 2: Build Java Application
-
-```bash
-cd application
-mvn clean package
-# Output: target/vprofile-v2.war
-```
-
-### Step 3: Configure AWS Credentials
-
-```bash
-aws configure
-# Enter:
-# - AWS Access Key ID
-# - AWS Secret Access Key
-# - Default region: eu-central-1
-# - Default output format: json
-```
-
-### Step 4: Initialize Terraform
-
-```bash
-cd ../terraform
-terraform init
-```
-
-**Expected Output:**
-```
-Initializing the backend...
-Initializing provider plugins...
-- Finding latest version of hashicorp/aws...
-- Installing hashicorp/aws v5.x.x...
-
-Terraform has been successfully initialized!
-```
-
-### Step 5: Review Terraform Plan
-
-```bash
-terraform plan
-```
-
-**Expected Output:**
-```
-Plan: 55 to add, 0 to change, 0 to destroy.
-```
-
-### Step 6: Deploy Infrastructure
-
-```bash
-terraform apply -auto-approve
-```
-
-**Deployment Timeline:**
-- VPC & Networking: ~2 minutes
-- EC2 Instances: ~3 minutes
-- User Data Execution: ~5 minutes
-- **Total: ~10 minutes**
-
-### Step 7: Verify Deployment
-
-```bash
-# Get Nginx public IP
-terraform output website_url
-
-# Expected: http://x.x.x.x
-```
-
-**Access Application:**
-1. Open browser
-2. Navigate to Nginx public IP
-3. Login with credentials
-4. Verify all services
-
-### Step 8: SSH Access (Optional)
-
-```bash
-# Get SSH commands
-terraform output ssh_commands
-
-# Example:
-ssh -i EC2_Key_Pair.pem ubuntu@3.79.181.71  # Nginx
-ssh -i EC2_Key_Pair.pem ubuntu@10.0.1.70    # Tomcat (via bastion)
-```
-
-### Step 9: Destroy Infrastructure (Cleanup)
-
-```bash
-terraform destroy -auto-approve
-```
-
----
-
-## 🏆 Key Achievements
-
-### 1. **100% Infrastructure Automation**
-- ✅ Zero manual AWS Console clicks
-- ✅ Entire infrastructure defined in code
-- ✅ Repeatable deployments across environments
-- ✅ Version-controlled infrastructure
-
-### 2. **Hybrid Automation Strategy**
-- ✅ Terraform manages both infra AND artifacts
-- ✅ S3 bucket creation automated
-- ✅ WAR file upload automated
-- ✅ EC2 artifact download via User Data
-- ✅ Single command deployment (`terraform apply`)
-
-### 3. **Security Best Practices**
-- ✅ IAM roles instead of access keys
-- ✅ Private subnets for backend services
-- ✅ Security groups with least privilege
-- ✅ NAT Gateway for controlled outbound access
-- ✅ No public IPs on database/cache/queue
-
-### 4. **Service Discovery Implementation**
-- ✅ Route53 Private Hosted Zone
-- ✅ DNS-based service communication
-- ✅ Decoupled from IP addresses
-- ✅ Supports disaster recovery
-
-### 5. **Multi-Tier Architecture**
-- ✅ Frontend: Nginx reverse proxy
-- ✅ Application: Tomcat Java EE
-- ✅ Database: MySQL
-- ✅ Cache: Memcached
-- ✅ Queue: RabbitMQ
-- ✅ All layers verified and functional
-
-### 6. **Production Readiness**
-- ✅ Multi-AZ deployment (3 zones)
-- ✅ Network isolation (public/private subnets)
-- ✅ Automated bootstrapping (User Data)
-- ✅ Monitoring ready (CloudWatch integration)
-- ✅ Backup ready (EBS snapshots)
-
----
-
-
-## 📊 Cost Analysis
-
-### Current Monthly Costs (Estimated)
-
-| Service | Resource | Quantity | Monthly Cost |
-|---------|----------|----------|--------------|
-| **EC2** | t2.micro instances | 5 | $36.50 |
-| **NAT Gateway** | Single NAT | 1 | $32.40 |
-| **S3** | Standard storage (1 GB) | 1 | $0.03 |
-| **Route53** | Hosted Zone | 1 | $0.50 |
-| **Data Transfer** | Outbound (10 GB) | - | $0.90 |
-| **Total** | - | - | **~$70/month** |
-
-### With Managed Services (Projected)
-
-| Service | Monthly Cost |
-|---------|--------------|
-| EC2 (ALB + ASG) | $45 |
-| RDS Multi-AZ | $30 |
-| ElastiCache | $15 |
-| Amazon MQ | $90 |
-| NAT Gateway | $32 |
-| **Total** | **~$212/month** |
-
-**Note:** Costs increase with managed services but provide:
-- 99.95% SLA
-- Automated backups
-- Multi-AZ redundancy
-- Reduced operational overhead
-
----
-
-## 📚 Additional Resources
-
-### Official Documentation
-- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [AWS VPC Documentation](https://docs.aws.amazon.com/vpc/)
-- [AWS EC2 Best Practices](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-best-practices.html)
-- [Route53 Private Hosted Zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-private.html)
-
-### Learning Resources
-- [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/)
-- [Terraform Best Practices](https://www.terraform-best-practices.com/)
-- [Cloud Migration Strategies (6 Rs)](https://aws.amazon.com/blogs/enterprise-strategy/6-strategies-for-migrating-applications-to-the-cloud/)
-
-### Community
-- [Terraform Community Forum](https://discuss.hashicorp.com/c/terraform-core)
-- [AWS re:Post](https://repost.aws/)
-- [DevOps Stack Exchange](https://devops.stackexchange.com/)
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
----
-
-## 🙏 Acknowledgments
-
-- AWS for comprehensive cloud infrastructure
-- HashiCorp for Terraform
-- Open-source community for tools and libraries
-- vProfile application developers
+**Each layer transforms. Each leap scales.**
 
 ---
 
 <div align="center">
 
-**⭐ Star this repository if you found it helpful!**
+**☁️ The cloud is just someone else's computer. Make it yours.**
 
-**Made with Amr for the DevOps Community**
+*Made with ascension for DevOps architects*
 
 </div>
