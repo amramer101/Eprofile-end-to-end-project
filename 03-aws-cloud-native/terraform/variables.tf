@@ -38,3 +38,15 @@ variable "S3_Bucket_Name" {
 variable "Pub_Key_Path" {
   default = "bean-stack-key.pub"
 }
+
+variable "db_name" {
+  default = "mydb"
+}
+
+variable "db_user_name" {
+  default = "admin"
+}
+
+variable "db_password" {
+  default = "admin123"
+}
