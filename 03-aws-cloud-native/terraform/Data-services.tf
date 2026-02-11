@@ -3,7 +3,7 @@
 ## RDS Subnet Group
 
 resource "aws_db_subnet_group" "RDS_subnet_group" {
-  name       = "RDS_subnet_group"
+  name       = "rds-subnet-group"
   subnet_ids = [module.vpc.private_subnets[0], module.vpc.private_subnets[1], module.vpc.private_subnets[2]]
 
   tags = {
@@ -35,18 +35,18 @@ resource "aws_db_instance" "RDS" {
 ## ElastiCache Subnet Group
 
 resource "aws_elasticache_subnet_group" "ElastiCache_subnet_group" {
-  name       = "ElastiCache_subnet_group"
-  subnet_ids =  [module.vpc.private_subnets[0], module.vpc.private_subnets[1], module.vpc.private_subnets[2]]
+  name       = "elastieache-subnet-group"
+  subnet_ids = [module.vpc.private_subnets[0], module.vpc.private_subnets[1], module.vpc.private_subnets[2]]
 
   tags = {
-    Name = "ElastiCache_subnet_group"
+    Name = "ElastiCache-subnet-group"
   }
 }
 
 ### ElastiCache Cluster
 
 resource "aws_elasticache_cluster" "ElastiCache" {
-  cluster_id           = "ElastiCache"
+  cluster_id           = "elasticache"
   engine               = "memcached"
   node_type            = "cache.t3.micro"
   num_cache_nodes      = 1
@@ -54,4 +54,25 @@ resource "aws_elasticache_cluster" "ElastiCache" {
   security_group_ids   = [aws_security_group.Data-SG.id]
   parameter_group_name = "default.memcached1.4"
   port                 = 11211
+
+}
+
+#### ---------------------------------------------------------------------------------------------
+
+
+### RabbitMQ 
+
+
+resource "aws_mq_broker" "RabbitMQ" {
+  broker_name = "example"
+
+  engine_type        = "RabbitMQ"
+  engine_version     = "3.13"
+  host_instance_type = "mq.t3.micro"
+  subnet_ids         = [module.vpc.private_subnets[0]]
+  security_groups    = [aws_security_group.Data-SG.id]
+  user {
+    username = var.rmq_user
+    password = var.rmq_password
+  }
 }

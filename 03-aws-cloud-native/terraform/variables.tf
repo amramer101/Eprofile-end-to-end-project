@@ -50,3 +50,11 @@ variable "db_user_name" {
 variable "db_password" {
   default = "admin123"
 }
+
+variable "rmq_user" {
+  default = "rabbit"
+}
+
+variable "rmq_password" {
+  default = "Gr33n@pple123456"
+}
