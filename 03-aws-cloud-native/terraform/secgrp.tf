@@ -25,8 +25,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_frontend" 
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
-
-
+####---------------------------------------------------------------------------------------------
 
 ### Security Group for the Tomcat EC2 Instance
 
@@ -62,10 +61,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_tomcat" {
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
-
-
-
-
+####---------------------------------------------------------------------------------------------
 
 ### Security Group for the Data EC2s Instance
 
@@ -129,9 +125,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_Data" {
 }
 
 
-
-
-
+####---------------------------------------------------------------------------------------------
 
 ### Security Group for the Bastion EC2s Instance
 
