@@ -104,19 +104,30 @@ resource "aws_vpc_security_group_ingress_rule" "allow_5672_from_tomcat-SG" {
   to_port                      = 5672
 }
 
+resource "aws_vpc_security_group_ingress_rule" "allow_3306_from_Bastion" {
+  security_group_id = aws_security_group.Data-SG.id
+  referenced_security_group_id = aws_security_group.Bastion-SG.id
+  from_port         = 3306
+  ip_protocol       = "tcp"
+  to_port           = 3306
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_ipv4_internal" {
+  security_group_id = aws_security_group.Data-SG.id
+  referenced_security_group_id = aws_security_group.Data-SG.id
+  from_port         = 0
+  ip_protocol       = "tcp"
+  to_port           = 65535
+}
+
+
+
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_Data" {
   security_group_id = aws_security_group.Data-SG.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_Bastion" {
-  security_group_id = aws_security_group.Data-SG.id
-  referenced_security_group_id = aws_security_group.Bastion-SG.id
-  from_port         = 22
-  ip_protocol       = "tcp"
-  to_port           = 22
-}
 
 
 
