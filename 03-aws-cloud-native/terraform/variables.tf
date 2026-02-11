@@ -44,7 +44,7 @@ variable "S3_Bucket_Name" {
 
 ## Key Variables
 
-variable "Pub_Key_Path" {
+variable "pub_key_path" {
   default = "bean-stack-key.pub"
 }
 
