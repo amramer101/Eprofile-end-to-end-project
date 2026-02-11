@@ -82,6 +82,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_tomcat" {
 
 
 
+
 ### Security Group for the Data EC2s Instance
 
 resource "aws_security_group" "Data-SG" {
