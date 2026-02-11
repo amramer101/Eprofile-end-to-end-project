@@ -4,7 +4,7 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   application         = aws_elastic_beanstalk_application.Eprofile_bean_app.name
   solution_stack_name = "64bit Amazon Linux 2023 v5.9.3 running Tomcat 10 Corretto 21"
 
-setting {
+  setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
     value     = "aws-elasticbeanstalk-ec2-role"
@@ -136,6 +136,6 @@ setting {
     value     = aws_security_group.Load-Balancer-SG.id
   }
 
-  depends_on = [aws_security_group.Load-Balancer-SG , aws_security_group.Tomcat-SG]
+  depends_on = [aws_security_group.Load-Balancer-SG, aws_security_group.Tomcat-SG]
 
 }
