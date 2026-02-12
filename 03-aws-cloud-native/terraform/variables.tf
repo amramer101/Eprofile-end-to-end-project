@@ -48,6 +48,10 @@ variable "pub_key_path" {
   default = "bean-stack-key.pub"
 }
 
+variable "piv_key_path" {
+  default = "bean-stack-key"
+}
+
 ## DataBase Services Variables
 
 variable "db_name" {
