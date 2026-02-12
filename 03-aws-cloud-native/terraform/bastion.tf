@@ -50,6 +50,7 @@ resource "aws_instance" "bastion" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/bastion-setup.sh",
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
       "sudo /tmp/bastion-setup.sh"
     ]
   }

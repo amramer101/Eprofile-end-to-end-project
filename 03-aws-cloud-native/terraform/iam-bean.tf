@@ -2,7 +2,7 @@
 # 1. Service Role (For Elastic Beanstalk Service itself)
 # -----------------------------------------------------------
 resource "aws_iam_role" "beanstalk_service" {
-  name = "vprofile-beanstalk-service-role"
+  name = "eprofile-beanstalk-service-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -37,7 +37,7 @@ resource "aws_iam_role_policy_attachment" "beanstalk_service_managed" {
 # 2. EC2 Instance Role (For the Tomcat Instances)
 # -----------------------------------------------------------
 resource "aws_iam_role" "beanstalk_ec2" {
-  name = "vprofile-beanstalk-ec2-role"
+  name = "eprofile-beanstalk-ec2-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -72,7 +72,7 @@ resource "aws_iam_role_policy_attachment" "beanstalk_ec2_admin" {
 # 4. AWSElasticBeanstalkRoleSNS
 resource "aws_iam_role_policy_attachment" "beanstalk_ec2_sns" {
   role       = aws_iam_role.beanstalk_ec2.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
+policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkRoleSNS"
 }
 
 
