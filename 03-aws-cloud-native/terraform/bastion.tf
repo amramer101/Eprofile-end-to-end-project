@@ -56,5 +56,5 @@ resource "aws_instance" "bastion" {
   }
 
 
-depends_on = [ aws_db_instance.RDS ]
+  depends_on = [aws_db_instance.RDS]
 }

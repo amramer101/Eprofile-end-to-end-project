@@ -4,30 +4,27 @@ data "aws_iam_role" "existing_service_role" {
 }
 
 data "aws_iam_instance_profile" "existing_ec2_profile" {
-  name = "aws-elasticbeanstalk-ec2-role"
+  name = "beanstack-role"
 }
 
-# 2. إعداد البيئة
 resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   name                = "elbeanstalkenv"
   application         = aws_elastic_beanstalk_application.Eprofile_bean_app.name
   solution_stack_name = "64bit Amazon Linux 2023 v5.9.3 running Tomcat 10 Corretto 21"
   cname_prefix        = "eprofileapp254698"
 
-  # --- تصحيح الـ IAM Settings (التركيز هنا) ---
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
-    # الصح: نستخدم الـ Instance Profile (للمكن)
-    value     = data.aws_iam_instance_profile.existing_ec2_profile.name 
+    value = data.aws_iam_instance_profile.existing_ec2_profile.name
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "ServiceRole"
     # الصح: نستخدم الـ Service Role (للخدمة)
-    value     = data.aws_iam_role.existing_service_role.name
+    value = data.aws_iam_role.existing_service_role.name
   }
 
   # --- باقي الإعدادات (سليمة) ---
