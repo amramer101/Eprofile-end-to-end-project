@@ -1,3 +1,10 @@
+data "aws_iam_role" "existing_service_role" {
+  name = "aws-elasticbeanstalk-service-role"
+} 
+
+data "aws_iam_instance_profile" "existing_ec2_profile" {
+  name = "aws-elasticbeanstalk-ec2-role"
+}
 
 resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   name                = "elbeanstalkenv"
@@ -8,8 +15,15 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
-    value     = "aws-elasticbeanstalk-ec2-role"
+    value     = data.aws_iam_instance_profile.existing_ec2_profile.name 
   }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment"
+    name      = "ServiceRole"
+    value     = data.aws_iam_role.existing_service_role.arn
+  }
+
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "RootVolumeType"
