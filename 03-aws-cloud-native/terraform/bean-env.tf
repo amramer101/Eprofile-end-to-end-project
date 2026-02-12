@@ -1,28 +1,20 @@
-data "aws_iam_role" "existing_service_role" {
-  name = "aws-elasticbeanstalk-service-role"
-}
-
-data "aws_iam_instance_profile" "existing_ec2_profile" {
-  name = "beanstack-role"
-}
-
 
 resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   name                = "elbeanstalkenv"
   application         = aws_elastic_beanstalk_application.Eprofile_bean_app.name
   solution_stack_name = "64bit Amazon Linux 2023 v5.9.3 running Tomcat 10 Corretto 21"
-  cname_prefix        = "eprofileapp254698"
+  cname_prefix        = "eprofileapp254698" # must be unique across all of AWS, so you might want to change it
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
-    value     = data.aws_iam_instance_profile.existing_ec2_profile.name
+    value     = aws_iam_role.beanstalk_ec2.name
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "ServiceRole"
-    value     = data.aws_iam_role.existing_service_role.arn
+    value     = aws_iam_role.beanstalk_service.name
   }
 
   setting {

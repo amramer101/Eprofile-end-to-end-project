@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "s3-terraform-2026"
+    bucket = "s3-terraform-2026" # make sure to create this bucket in AWS S3 before running terraform init 
     key    = "s3-terraform-2026/terraform"
     region = "eu-central-1"
   }
