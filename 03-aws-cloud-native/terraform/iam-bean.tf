@@ -1,85 +1,71 @@
-# -----------------------------------------------------------
-# 1. Service Role (For Elastic Beanstalk Service itself)
-# -----------------------------------------------------------
+# 1. Service Role (aws-elasticbeanstalk-service-role)
 resource "aws_iam_role" "beanstalk_service" {
-  name = "eprofile-beanstalk-service-role"
+  name = "eprofile-beanstalk-service-role-auto"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
-      Principal = {
-        Service = "elasticbeanstalk.amazonaws.com"
-      }
-      Condition = {
-        StringLike = {
-          "sts:ExternalId" = "elasticbeanstalk"
-        }
-      }
+      Principal = { Service = "elasticbeanstalk.amazonaws.com" }
+      Condition = { StringLike = { "sts:ExternalId" = "elasticbeanstalk" } }
     }]
   })
 }
 
-# Attach "Enhanced Health" Policy
-resource "aws_iam_role_policy_attachment" "beanstalk_service_enhanced_health" {
+# Attachments for Service Role 
+resource "aws_iam_role_policy_attachment" "service_enhanced_health" {
   role       = aws_iam_role.beanstalk_service.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkEnhancedHealth"
 }
 
-# Attach "Managed Updates" Policy
-resource "aws_iam_role_policy_attachment" "beanstalk_service_managed" {
+resource "aws_iam_role_policy_attachment" "service_managed_updates" {
   role       = aws_iam_role.beanstalk_service.name
   policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkManagedUpdatesCustomerRolePolicy"
 }
 
-# -----------------------------------------------------------
-# 2. EC2 Instance Role (For the Tomcat Instances)
-# -----------------------------------------------------------
+# 2. EC2 Instance Role (beanstack-role)
 resource "aws_iam_role" "beanstalk_ec2" {
-  name = "eprofile-beanstalk-ec2-role"
+  name = "eprofile-beanstalk-ec2-role-auto"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
+      Principal = { Service = "ec2.amazonaws.com" }
     }]
   })
 }
 
-# 1. WebTier
-resource "aws_iam_role_policy_attachment" "beanstalk_ec2_web" {
-  role       = aws_iam_role.beanstalk_ec2.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"
-}
+# Attachments for EC2 Role 
 
-# 2. WorkerTier
-resource "aws_iam_role_policy_attachment" "beanstalk_ec2_worker" {
-  role       = aws_iam_role.beanstalk_ec2.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
-}
-
-# 3. AdministratorAccess-AWSElasticBeanstalk
-resource "aws_iam_role_policy_attachment" "beanstalk_ec2_admin" {
+# 1. AdministratorAccess-AWSElasticBeanstalk
+resource "aws_iam_role_policy_attachment" "ec2_admin" {
   role       = aws_iam_role.beanstalk_ec2.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess-AWSElasticBeanstalk"
 }
 
-# 4. AWSElasticBeanstalkRoleSNS
-resource "aws_iam_role_policy_attachment" "beanstalk_ec2_sns" {
+# 2. AWSElasticBeanstalkCustomPlatformforEC2Role
+resource "aws_iam_role_policy_attachment" "ec2_custom_platform" {
+  role       = aws_iam_role.beanstalk_ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkCustomPlatformforEC2Role"
+}
+
+# 3. AWSElasticBeanstalkRoleSNS 
+resource "aws_iam_role_policy_attachment" "ec2_sns" {
   role       = aws_iam_role.beanstalk_ec2.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkRoleSNS"
 }
 
+# 4. AWSElasticBeanstalkWebTier
+resource "aws_iam_role_policy_attachment" "ec2_web_tier" {
+  role       = aws_iam_role.beanstalk_ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"
+}
 
-# -----------------------------------------------------------
 # 3. Instance Profile (The Wrapper)
-# -----------------------------------------------------------
 resource "aws_iam_instance_profile" "beanstalk_ec2_profile" {
-  name = "vprofile-beanstalk-ec2-profile"
+  name = "eprofile-beanstalk-ec2-profile-auto"
   role = aws_iam_role.beanstalk_ec2.name
 }

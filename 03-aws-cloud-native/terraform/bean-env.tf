@@ -1,11 +1,3 @@
-# 1. جلب البيانات الموجودة فعلياً في حسابك
-data "aws_iam_role" "existing_service_role" {
-  name = "aws-elasticbeanstalk-service-role"
-}
-
-data "aws_iam_instance_profile" "existing_ec2_profile" {
-  name = "beanstack-role"
-}
 
 resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   name                = "elbeanstalkenv"
