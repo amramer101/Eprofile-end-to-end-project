@@ -9,17 +9,14 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
-    value     = data.aws_iam_instance_profile.existing_ec2_profile.name
+    value     = aws_iam_role.beanstalk_ec2.name
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "ServiceRole"
-    # الصح: نستخدم الـ Service Role (للخدمة)
-    value = data.aws_iam_role.existing_service_role.name
+    value = aws_iam_role.beanstalk_service.name
   }
-
-  # --- باقي الإعدادات (سليمة) ---
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -66,7 +63,7 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MaxSize"
-    value     = "2" # قللتها لـ 2 عشان الـ Free Tier
+    value     = "2" 
   }
 
   setting {
@@ -81,5 +78,5 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
     value     = aws_security_group.Load-Balancer-SG.id
   }
 
-  depends_on = [aws_security_group.Load-Balancer-SG, aws_security_group.Tomcat-SG]
+  depends_on = [aws_security_group.Load-Balancer-SG, aws_security_group.Tomcat-SG, aws_iam_role.beanstalk_service, aws_iam_role.beanstalk_ec2]
 }

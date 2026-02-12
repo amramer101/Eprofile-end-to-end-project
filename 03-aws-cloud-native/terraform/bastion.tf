@@ -32,6 +32,7 @@ resource "aws_instance" "bastion" {
     Name = "bastion"
   }
 
+  #### Provisioning the Bastion Host with the RDS endpoint and credentials
   provisioner "file" {
 
     content     = templatefile("templates/db-init.tmpl", { rds-endpoint = aws_db_instance.RDS.address, dbuser = var.db_user_name, dbpass = var.db_password })
@@ -45,7 +46,6 @@ resource "aws_instance" "bastion" {
     private_key = file(var.priv_key_path)
     host        = self.public_ip
   }
-
 
   provisioner "remote-exec" {
     inline = [
