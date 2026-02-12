@@ -82,3 +82,22 @@ variable "rmq_password" {
 variable "bastion_host_username" {
   default = "ubuntu"
 }
+
+
+
+## CodeBuild Variables
+
+
+variable "github_token" {
+  description = "GitHub Personal Access Token"  ## if required, create a personal access token in GitHub with repo permissions and add it to your environment variables as GITHUB_TOKEN
+  sensitive   = true
+}
+
+variable "github_owner" {  
+  description = "GitHub Username"  ## if required, add your GitHub username to your environment variables as GITHUB_OWNER
+}
+
+variable "github_repo" {
+  description = "Repository Name"
+  default     = "https://github.com/amramer101/Strata-Ops.git"
+}
