@@ -9,8 +9,9 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
-    value     = aws_iam_role.beanstalk_ec2.name
-  }
+    value     = aws_iam_instance_profile.beanstalk_ec2_profile.name  
+    
+    }
 
   setting {
     namespace = "aws:elasticbeanstalk:environment"
