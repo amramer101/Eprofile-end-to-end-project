@@ -72,7 +72,7 @@ resource "aws_iam_role_policy_attachment" "beanstalk_ec2_admin" {
 # 4. AWSElasticBeanstalkRoleSNS
 resource "aws_iam_role_policy_attachment" "beanstalk_ec2_sns" {
   role       = aws_iam_role.beanstalk_ec2.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkRoleSNS"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
 }
 
 
