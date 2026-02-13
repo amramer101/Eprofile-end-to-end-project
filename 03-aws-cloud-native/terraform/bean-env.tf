@@ -85,6 +85,11 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
     name      = "RDS_HOSTNAME"
     value     = aws_db_instance.RDS.address
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "RDS_DB_NAME"
+    value     = var.db_name
+  } 
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -107,8 +112,7 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "RABBITMQ_HOSTNAME"
-    # معادلة عشان تجيب الدومين بس من غير بروتوكول
-    value = split("/", split("@", aws_mq_broker.RabbitMQ.instances[0].endpoints[0])[0])[2]
+    value     = split(":", split("//", aws_mq_broker.RabbitMQ.instances[0].endpoints[0])[1])[0]
   }
 
   setting {
@@ -123,5 +127,12 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
     value     = var.rmq_password
   }
 
-  depends_on = [aws_security_group.Load-Balancer-SG, aws_security_group.Tomcat-SG, aws_iam_role.beanstalk_service, aws_iam_role.beanstalk_ec2]
-}
+  depends_on = [
+    aws_security_group.Load-Balancer-SG,
+    aws_security_group.Tomcat-SG,
+    aws_db_instance.RDS,
+    aws_mq_broker.RabbitMQ,
+    aws_elasticache_cluster.ElastiCache
+  ]
+  
+  }
