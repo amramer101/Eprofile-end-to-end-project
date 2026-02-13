@@ -1,0 +1,29 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21 
+  
+  pre_build:
+    commands:
+      - echo "Installing dependencies..."
+      - apt-get update
+      - apt-get install -y maven
+      
+  build:
+    commands:
+      - echo "Build started on `date`"
+      - echo "Compiling Java code..."
+      - mvn clean install -DskipTests
+      
+  post_build:
+    commands:
+      - echo "Build completed on `date`"
+      - echo "Renaming artifact for deployment..."
+      - mv target/vprofile-v2.war target/ROOT.war
+
+artifacts:
+  files:
+    - target/ROOT.war
+  discard-paths: yes
