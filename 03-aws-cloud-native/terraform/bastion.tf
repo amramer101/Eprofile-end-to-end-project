@@ -33,28 +33,13 @@ resource "aws_instance" "bastion" {
   }
 
   #### Provisioning the Bastion Host with the RDS endpoint and credentials
-  provisioner "file" {
-
-    content     = templatefile("templates/db-init.tmpl", { rds-endpoint = aws_db_instance.RDS.address, dbuser = var.db_user_name, dbpass = var.db_password })
-    destination = "/tmp/bastion-setup.sh"
-
-  }
-
-  connection {
-    type        = "ssh"
-    user        = var.bastion_host_username
-    private_key = file(var.priv_key_path)
-    host        = self.public_ip
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/bastion-setup.sh",
-      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
-      "sudo /tmp/bastion-setup.sh"
-    ]
-  }
-
+  # Updated to use templatefile with corrected variable names
+  user_data = base64encode(templatefile("${path.module}/templates/bastion-init.sh", {
+    RDS_ENDPOINT = aws_db_instance.RDS.address
+    DB_USER      = var.db_user_name
+    DB_PASSWORD  = var.db_password
+    DB_NAME      = var.db_name
+  }))
 
   depends_on = [aws_db_instance.RDS]
 }
