@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 ## primary RabbitMQ signing key
 rpm --import 'https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc'
 ## modern Erlang repository

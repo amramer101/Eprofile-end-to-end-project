@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 DATABASE_PASS='admin123'
 sudo dnf update -y
 sudo dnf install git zip unzip -y

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 sudo dnf install memcached -y
 sudo systemctl start memcached
 sudo systemctl enable memcached
