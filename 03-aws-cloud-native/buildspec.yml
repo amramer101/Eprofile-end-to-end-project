@@ -15,7 +15,6 @@ phases:
     commands:
       - echo "Build started on `date`"
       - echo "Compiling Java code..."
-      - cd 03-aws-cloud-native
       - mvn clean install -DskipTests
       
   post_build:
@@ -27,5 +26,5 @@ phases:
 
 artifacts:
   files:
-    - 03-aws-cloud-native/target/ROOT.war
+    - target/ROOT.war
   discard-paths: yes

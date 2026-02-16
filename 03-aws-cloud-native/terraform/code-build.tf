@@ -77,7 +77,7 @@ resource "aws_codepipeline" "vprofile_pipeline" {
 
       configuration = {
         ConnectionArn    = aws_codestarconnections_connection.github_connection.arn ## replace with your actual connection ARN
-        FullRepositoryId = "amramer101/Strata-Ops"           ## your GitHub username/repo
+        FullRepositoryId = "amramer101/Strata-Ops"                                  ## your GitHub username/repo
         BranchName       = "main"
         DetectChanges    = "false"
       }

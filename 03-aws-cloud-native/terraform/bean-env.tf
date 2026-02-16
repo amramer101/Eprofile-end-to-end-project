@@ -127,7 +127,7 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
     value     = var.rmq_password
   }
 
-    setting {
+  setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "RABBITMQ_PORT"
     value     = "5671"

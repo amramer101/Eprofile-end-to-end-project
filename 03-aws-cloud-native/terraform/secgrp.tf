@@ -1,3 +1,13 @@
+data "http" "my_public_ip" {
+  url = "https://icanhazip.com"
+}
+
+locals {
+  # Use chomp() to remove any trailing newlines or whitespace
+  my_public_ip_cidr = "${chomp(data.http.my_public_ip.response_body)}/32"
+}
+
+
 
 ### Security Group for the Frontend EC2 Instance
 
@@ -41,7 +51,7 @@ resource "aws_security_group" "Tomcat-SG" {
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_tomcat" {
   security_group_id = aws_security_group.Tomcat-SG.id
-  cidr_ipv4         = "0.0.0.0/0" # Note: In production, it's recommended to restrict this to specific IPs or ranges for security reasons.
+  cidr_ipv4         = local.my_public_ip_cidr
   from_port         = 22
   ip_protocol       = "tcp"
   to_port           = 22
@@ -141,7 +151,7 @@ resource "aws_security_group" "Bastion-SG" {
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_Bastion" {
   security_group_id = aws_security_group.Bastion-SG.id
-  cidr_ipv4         = "0.0.0.0/0" # Note: In production, it's recommended to restrict this to specific IPs or ranges for security reasons.
+  cidr_ipv4         =  local.my_public_ip_cidr
   from_port         = 22
   ip_protocol       = "tcp"
   to_port           = 22
