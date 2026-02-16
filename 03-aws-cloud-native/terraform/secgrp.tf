@@ -1,5 +1,5 @@
 data "http" "my_public_ip" {
-  url = "https://icanhazip.com"
+  url = "http://checkip.amazonaws.com/"
 }
 
 locals {
@@ -77,7 +77,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_tomcat" {
 
 resource "aws_security_group" "Data-SG" {
   name        = "Data-SG"
-  description = "Allow 3306, 11211, 5672 inbound traffic from tomcat and all outbound traffic"
+  description = "Allow 3306, 11211, 5671 inbound traffic from tomcat and all outbound traffic"
   vpc_id      = module.vpc.vpc_id
 
   tags = {
@@ -102,7 +102,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_11211_from_tomcat-SG" {
   to_port                      = 11211
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_5672_from_tomcat-SG" {
+resource "aws_vpc_security_group_ingress_rule" "allow_5671_from_tomcat-SG" {
   security_group_id            = aws_security_group.Data-SG.id
   referenced_security_group_id = aws_security_group.Tomcat-SG.id
   from_port                    = 5671
@@ -151,7 +151,7 @@ resource "aws_security_group" "Bastion-SG" {
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_Bastion" {
   security_group_id = aws_security_group.Bastion-SG.id
-  cidr_ipv4         =  local.my_public_ip_cidr
+  cidr_ipv4         = local.my_public_ip_cidr
   from_port         = 22
   ip_protocol       = "tcp"
   to_port           = 22
