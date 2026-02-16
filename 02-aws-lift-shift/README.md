@@ -51,7 +51,7 @@ The Crust (Cloud Native)     → Serverless, managed services
 
 ## 🏗️ Cloud Architecture
 
-![Architecture Diagram](media/Digram.png)
+![Architecture Diagram](../media/Lift-shift/Digram.png)
 
 ### The Three Zones
 
@@ -135,7 +135,7 @@ resource "aws_instance" "tomcat" {
 - ✅ No manual S3 uploads
 - ✅ Repeatable across environments
 
-![S3 Artifact Storage](media/03-s3-artifact-storage.png)
+![S3 Artifact Storage](../media/Lift-shift/03-s3-artifact-storage.png)
 
 ---
 
@@ -211,7 +211,7 @@ MySQL SG:
 
 ## 🗺️ Service Discovery: Route53 Private Zone
 
-![Route53 Private Zone](media/02-route53-private-zone.png)
+![Route53 Private Zone](../media/Lift-shift/02-route53-private-zone.png)
 
 ### DNS-Based Decoupling
 
@@ -249,7 +249,7 @@ cache.host=mc01.eprofile.in
 
 ## 🚀 Terraform in Action
 
-![Terraform Plan Summary](media/04-terraform-plan-summary.png)
+![Terraform Plan Summary](../media/Lift-shift/04-terraform-plan-summary.png)
 
 ### What Gets Created?
 
@@ -280,7 +280,7 @@ terraform destroy -auto-approve
 
 **Version control your infrastructure. Treat it like code.**
 
-![Terraform](media/Terraform.svg)
+![Terraform](../media/Lift-shift/Terraform.svg)
 
 ---
 
@@ -288,7 +288,7 @@ terraform destroy -auto-approve
 
 ### 1. All Services Running
 
-![EC2 Instances Running](media/01-aws-ec2-instances-running.png)
+![EC2 Instances Running](../media/Lift-shift/01-aws-ec2-instances-running.png)
 
 | Instance | Instance ID | AZ | Public IP | Private IP | Status |
 |----------|------------|----|-----------|-----------| -------|
@@ -302,7 +302,7 @@ terraform destroy -auto-approve
 
 ### 2. Application Accessible
 
-![Application Login Page](media/05-app-login-page.png)
+![Application Login Page](../media/Lift-shift/05-app-login-page.png)
 
 **Test:** `http://3.79.181.71`
 
@@ -313,7 +313,7 @@ terraform destroy -auto-approve
 
 ### 3. Database Connected
 
-![Database Connection Success](media/06-app-db-connection-success.png)
+![Database Connection Success](../media/Lift-shift/06-app-db-connection-success.png)
 
 **Message:** "Data is From DB and Data Inserted In Cache !!"
 
@@ -324,7 +324,7 @@ terraform destroy -auto-approve
 
 ### 4. Cache Working
 
-![Data from Cache](media/08-Data-from-Cache.png)
+![Data from Cache](../media/Lift-shift/08-Data-from-Cache.png)
 
 **Message:** "[Data is From Cache]" (red badge)
 
@@ -334,7 +334,7 @@ terraform destroy -auto-approve
 
 ### 5. Message Queue Active
 
-![RabbitMQ Console](media/07-rabbitmq-console.png)
+![RabbitMQ Console](../media/Lift-shift/07-rabbitmq-console.png)
 
 **Status:** "RabbitMQ Initiated"  
 **Connections:** 6 active
