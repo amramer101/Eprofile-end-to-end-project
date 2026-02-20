@@ -130,7 +130,7 @@ resource "aws_elastic_beanstalk_environment" "elbeanstalk_env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "RABBITMQ_PORT"
-    value     = "5671"
+    value     = "5672"
   }
 
   depends_on = [

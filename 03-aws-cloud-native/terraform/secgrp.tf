@@ -77,7 +77,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_tomcat" {
 
 resource "aws_security_group" "Data-SG" {
   name        = "Data-SG"
-  description = "Allow 3306, 11211, 5671 inbound traffic from tomcat and all outbound traffic"
+  description = "Allow 3306, 11211, 5672 inbound traffic from tomcat and all outbound traffic"
   vpc_id      = module.vpc.vpc_id
 
   tags = {
@@ -105,9 +105,9 @@ resource "aws_vpc_security_group_ingress_rule" "allow_11211_from_tomcat-SG" {
 resource "aws_vpc_security_group_ingress_rule" "allow_5671_from_tomcat-SG" {
   security_group_id            = aws_security_group.Data-SG.id
   referenced_security_group_id = aws_security_group.Tomcat-SG.id
-  from_port                    = 5671
+  from_port                    = 5672
   ip_protocol                  = "tcp"
-  to_port                      = 5671
+  to_port                      = 5672
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_3306_from_Bastion" {
