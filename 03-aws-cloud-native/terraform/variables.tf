@@ -88,3 +88,23 @@ variable "sns_email" {
 variable "beanstalk_cname" {
   default = "eprofileapp254698"
 }
+
+## SonarCloud Variables
+
+variable "sonar_token" {
+  description = "SonarCloud Authentication Token"
+  type        = string
+  sensitive   = true
+}
+
+variable "sonar_organization" {
+  description = "SonarCloud Organization Name"
+  type        = string
+  default = "amramer101"
+}
+
+variable "sonar_project_key" {
+  description = "SonarCloud Project Key"
+  type        = string
+  default = "amramer101_Strata-Ops"
+}

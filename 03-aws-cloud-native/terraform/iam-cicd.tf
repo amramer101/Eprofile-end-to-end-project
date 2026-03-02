@@ -103,7 +103,7 @@ resource "aws_iam_role_policy" "codebuild_security_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-
+      # 1. Logs
       {
         Effect = "Allow"
         Action = [
@@ -113,32 +113,56 @@ resource "aws_iam_role_policy" "codebuild_security_policy" {
         ]
         Resource = "arn:aws:logs:*:*:*"
       },
-
+      # 2. S3 (Pipeline Bucket)
       {
         Effect = "Allow"
         Action = [
           "s3:GetObject",
           "s3:GetObjectVersion",
-          "s3:PutObject"
+          "s3:PutObject",
+          "s3:GetBucketAcl",
+          "s3:GetBucketLocation"
         ]
-        Resource = "${aws_s3_bucket.codepipeline_bucket.arn}/*"
+        Resource = [
+          aws_s3_bucket.codepipeline_bucket.arn,
+          "${aws_s3_bucket.codepipeline_bucket.arn}/*"
+        ]
       },
-
+      # 3. SSM Parameter Store
       {
         Effect = "Allow"
         Action = [
           "ssm:GetParameter",
           "ssm:GetParameters"
         ]
-        Resource = "arn:aws:ssm:*:*:parameter/strata-ops/*"
+        Resource = "arn:aws:ssm:*:*:parameter/strata-ops/sonar-*"
       },
-
+      # 4. CodeArtifact
+      {
+        Effect = "Allow"
+        Action = [
+          "codeartifact:GetAuthorizationToken",
+          "codeartifact:GetRepositoryEndpoint",
+          "codeartifact:ReadFromRepository"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["sts:GetServiceBearerToken"]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "sts:AWSServiceName" = "codeartifact.amazonaws.com"
+          }
+        }
+      },
+      # 5. GitHub Connection
       {
         Effect   = "Allow"
         Action   = ["codestar-connections:UseConnection"]
         Resource = aws_codestarconnections_connection.github_connection.arn
       }
-
     ]
   })
 }
