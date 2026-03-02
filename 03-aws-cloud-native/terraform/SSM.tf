@@ -11,7 +11,7 @@ resource "aws_ssm_parameter" "mysql_password" {
 
 
 resource "random_password" "rmq_password" {
-  length  = 8
+  length  = 12
   special = false
 }
 
