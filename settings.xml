@@ -15,7 +15,7 @@
     <repositories>
       <repository>
         <id>codeartifact</id>
-    <url>{env.CODEARTIFACT_URL}</url>
+    <url>${env.CODEARTIFACT_URL}</url>
       </repository>
     </repositories>
   </profile>
@@ -27,7 +27,7 @@
   <mirror>
     <id>codeartifact</id>
     <name>domainname--maven-central-store</name>
-    <url>{env.CODEARTIFACT_URL}</url>
+    <url>${env.CODEARTIFACT_URL}</url>
     <mirrorOf>*</mirrorOf>
   </mirror>
 </mirrors>

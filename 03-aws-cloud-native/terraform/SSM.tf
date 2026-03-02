@@ -1,6 +1,6 @@
 resource "random_password" "db_password" {
-  length           = 8
-  special          = false
+  length  = 8
+  special = false
 }
 
 resource "aws_ssm_parameter" "mysql_password" {
@@ -11,8 +11,8 @@ resource "aws_ssm_parameter" "mysql_password" {
 
 
 resource "random_password" "rmq_password" {
-  length           = 8
-  special          = false
+  length  = 8
+  special = false
 }
 
 resource "aws_ssm_parameter" "rabbitmq_password" {
