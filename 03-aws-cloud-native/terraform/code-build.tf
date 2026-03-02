@@ -31,6 +31,8 @@ resource "aws_codebuild_project" "vprofile_build" {
   }
 }
 
+## ---------------------------------------------------------------------
+
 # 3. CodeStar Connection 
 resource "aws_codestarconnections_connection" "github_connection" {
   name          = "vprofile-github-conn"
@@ -64,13 +66,6 @@ resource "aws_codebuild_project" "vprofile_security_scan" {
     buildspec = "03-aws-cloud-native/buildspec-sec.yml"
   }
 }
-
-# 3. CodeStar Connection 
-resource "aws_codestarconnections_connection" "github_connection" {
-  name          = "vprofile-github-conn"
-  provider_type = "GitHub"
-}
-
 
 
 

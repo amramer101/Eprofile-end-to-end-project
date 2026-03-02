@@ -100,11 +100,11 @@ variable "sonar_token" {
 variable "sonar_organization" {
   description = "SonarCloud Organization Name"
   type        = string
-  default = "amramer101"
+  default     = "amramer101"
 }
 
 variable "sonar_project_key" {
   description = "SonarCloud Project Key"
   type        = string
-  default = "amramer101_Strata-Ops"
+  default     = "amramer101_Strata-Ops"
 }
