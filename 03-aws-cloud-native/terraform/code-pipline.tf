@@ -1,5 +1,5 @@
 
-# . CodePipeline
+#  CodePipeline
 resource "aws_codepipeline" "vprofile_pipeline" {
   name          = "vprofile-pipeline"
   role_arn      = aws_iam_role.codepipeline_role.arn
@@ -46,7 +46,26 @@ resource "aws_codepipeline" "vprofile_pipeline" {
     }
   }
 
-  # Stage 2: Build
+  # Stage 2: Security Scan
+  stage {
+    name = "Build"
+
+    action {
+      name             = "SecurityScan"
+      category         = "Build"
+      owner            = "AWS"
+      provider         = "CodeBuild"
+      input_artifacts  = ["source_output"]
+      output_artifacts = ["security_output"]
+      version          = "1"
+
+      configuration = {
+        ProjectName = aws_codebuild_project.vprofile_security_scan.name
+      }
+    }
+  }
+
+  # Stage 3: Build
   stage {
     name = "Build"
 
@@ -65,7 +84,7 @@ resource "aws_codepipeline" "vprofile_pipeline" {
     }
   }
 
-  # Stage 3: Deploy
+  # Stage 4: Deploy
   stage {
     name = "Deploy"
 
