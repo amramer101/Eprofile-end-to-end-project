@@ -8,7 +8,7 @@ set -e
 # with proper schema and default users
 
 echo "========================================="
-echo "🗄️  Database Initialization Starting..."
+echo " Database Initialization Starting..."
 echo "========================================="
 
 # Export variables from Terraform
@@ -17,7 +17,7 @@ export DB_USER="${DB_USER}"
 export DB_PASSWORD="${DB_PASSWORD}"
 export DB_NAME="${DB_NAME}"
 
-echo "📋 Configuration:"
+echo "Configuration:"
 echo "   RDS Endpoint: $RDS_ENDPOINT"
 echo "   Database: $DB_NAME"
 echo "   User: $DB_USER"
@@ -87,7 +87,7 @@ fi
 
 # Verify critical tables exist
 echo ""
-echo "🔍 Verifying database structure..."
+echo "Verifying database structure..."
 
 TABLE_COUNT=$(mysql -h "$RDS_ENDPOINT" \
              -u "$DB_USER" \
@@ -116,7 +116,7 @@ fi
 
 # Verify users table exists and has admin_vp user
 echo ""
-echo "👥 Verifying application users..."
+echo "Verifying application users..."
 
 # Dynamically find the users table (typically named 'user')
 USERS_TABLE=$(mysql -h "$RDS_ENDPOINT" \
@@ -136,7 +136,7 @@ if [ -n "$USERS_TABLE" ]; then
               -e "SELECT COUNT(*) FROM user;" \
               2>/dev/null | tail -1)
   
-  echo "✅ Found $USER_COUNT users in table '$USERS_TABLE'"
+  echo "Found $USER_COUNT users in table '$USERS_TABLE'"
   
   # List users
   echo ""
@@ -149,7 +149,7 @@ if [ -n "$USERS_TABLE" ]; then
        -e "SELECT id, username, email FROM user LIMIT 10;" \
        2>/dev/null | sed 's/^/   /'
 else
-  echo "⚠️  WARNING: No user table found"
+  echo "WARNING: No user table found"
 fi
 
 # Check for admin_vp specifically
@@ -163,16 +163,16 @@ if [ -n "$USERS_TABLE" ]; then
                2>/dev/null | tail -1)
 
   if [ "$ADMIN_CHECK" -gt 0 ]; then
-    echo "✅ admin_vp user found in database!"
+    echo "admin_vp user found in database!"
   else
-    echo "⚠️  WARNING: admin_vp user NOT found - may need manual creation"
+    echo "WARNING: admin_vp user NOT found - may need manual creation"
   fi
 fi
 
 # Final summary
 echo ""
 echo "========================================="
-echo "✅ Database initialization completed!"
+echo "Database initialization completed!"
 echo "========================================="
 echo ""
 echo "Summary:"
