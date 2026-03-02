@@ -48,7 +48,7 @@ resource "aws_codepipeline" "vprofile_pipeline" {
 
   # Stage 2: Security Scan
   stage {
-    name = "Build"
+    name = "security-scan"
 
     action {
       name             = "SecurityScan"

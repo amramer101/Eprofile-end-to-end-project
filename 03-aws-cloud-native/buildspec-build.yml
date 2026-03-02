@@ -3,26 +3,24 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      java: corretto21 
-  
+      java: corretto17
+      
   pre_build:
     commands:
-      - echo "Installing dependencies..."
-      - apt-get update
-      - apt-get install -y maven
+      - echo "Fetching CodeArtifact Token..."
+      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ArtifactDomain --domain-owner ID --query authorizationToken --output text`
       
   build:
     commands:
       - echo "Build started on `date`"
-      - echo "Compiling Java code..."
-      - mvn clean install -DskipTests
+      - echo "Compiling and Packaging Java code..."
+      - mvn -s settings.xml clean package -DskipTests
       
   post_build:
     commands:
       - echo "Build completed on `date`"
-      - echo "Renaming artifact for deployment..."
+      - echo "Renaming artifact for Beanstalk Tomcat..."
       - mv target/vprofile-v2.war target/ROOT.war
-      - pwd
 
 artifacts:
   files:

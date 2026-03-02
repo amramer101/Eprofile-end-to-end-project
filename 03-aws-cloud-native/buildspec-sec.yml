@@ -1,37 +1,42 @@
 version: 0.2
 env:
   parameter-store:
-    LOGIN: LOGIN
-    HOST: HOST
-    Organization: Organization
-    Project: Project
-    #CODEARTIFACT_AUTH_TOKEN: CODEARTIFACT_AUTH_TOKEN
+    LOGIN: /strata-ops/sonar-token
+    Organization: /strata-ops/sonar-org
+    Project: /strata-ops/sonar-project
+
 phases:
   install:
     runtime-versions:
       java: corretto17
     commands:
-    - cp ./settings.xml /root/.m2/settings.xml
-    - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ArtifactDomain --domain-owner ID --region REGION --query authorizationToken --output text`
+      - apt-get update
+      - apt-get install -y jq checkstyle wget curl
+      
+      - echo "Installing tfsec..."
+      - wget -qO- https://github.com/aquasecurity/tfsec/releases/download/v1.28.1/tfsec-linux-amd64 > /usr/local/bin/tfsec
+      - chmod +x /usr/local/bin/tfsec
+      
+      - echo "Installing TruffleHog..."
+      - curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+      
   pre_build:
     commands:
-      - apt-get update
-      - apt-get install -y jq checkstyle
-      - wget https://dlcdn.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.tar.gz
-      - tar xzvf apache-maven-3.9.4-bin.tar.gz
-      - ln -s apache-maven-3.9.4 maven
-      - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
-      - unzip ./sonar-scanner-cli-3.3.0.1492-linux.zip
-      - export PATH=$PATH:/sonar-scanner-3.3.0.1492-linux/bin/
+      - echo "Fetching CodeArtifact Token for tests..."
+      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain ArtifactDomain --domain-owner ID --query authorizationToken --output text`
+      
   build:
     commands:
-      - mvn test
-      - mvn checkstyle:checkstyle
-      - echo "Installing JDK17 as its a dependency for sonarqube code analysis"
-      - apt-get install -y openjdk-17-jdk
-      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-      - mvn sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project -Dsonar.organization=$Organization -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ -Dsonar.junit.reportsPath=target/surefire-reports/ -Dsonar.jacoco.reportsPath=target/jacoco.exec -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml
+      - echo "1. Running TruffleHog (Secrets Scanning)..."
+      - trufflehog git file://. --only-verified --fail
+      
+      - echo "2. Running tfsec (IaC Security Scanning)..."
+      - tfsec ./03-aws-cloud-native/terraform
+      
+      - echo "3. Running Tests and SonarCloud (SAST) Analysis..."
+      - mvn -s settings.xml test checkstyle:checkstyle sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=$Project -Dsonar.organization=$Organization
+      
       - sleep 5
-      - curl https://sonarcloud.io/api/qualitygates/project_status?projectKey=$Project >result.json
-      - cat result.json
-      - if [ $(jq -r '.projectStatus.status' result.json) = ERROR ] ; then $CODEBUILD_BUILD_SUCCEEDING -eq 0 ;fi
+      - echo "Checking SonarCloud Quality Gate..."
+      - curl https://sonarcloud.io/api/qualitygates/project_status?projectKey=$Project > result.json
+      - if [ $(jq -r '.projectStatus.status' result.json) = ERROR ] ; then echo "Quality Gate Failed!"; exit 1 ;fi
