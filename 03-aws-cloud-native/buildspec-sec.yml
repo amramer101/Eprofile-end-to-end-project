@@ -23,7 +23,7 @@ phases:
   pre_build:
     commands:
       - echo "Fetching CodeArtifact Token for tests..."
-      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain vprofile-domain --domain-owner 123456789012 --query authorizationToken --output text`
+      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain vprofile-domain --query authorizationToken --output text`
       
   build:
     commands:
