@@ -67,20 +67,6 @@ The same Java application from Phase 2 now runs on a **fully managed, auto-scali
 
 ---
 
-## 📊 Architecture Overview (C4 Model):**
-
-> The diagram above illustrates the complete cloud-native infrastructure and continuous delivery flow for **Strata-Ops (Phase 3)**. 
-
-![Architecture](../media/cloud-native/System.png)
-
-
-> **Key Architectural Highlights:**
-> * **Zero-Trust CI/CD:** Fully automated pipeline via AWS CodePipeline with strict security gates (TruffleHog, tfsec, SonarCloud).
-> * **Dynamic Secrets Injection:** Utilizing **AWS SSM Parameter Store** to inject database credentials at runtime, completely eliminating hardcoded secrets from the source code.
-> * **Highly Available Compute:** Java application (ROOT.war) deployed on a scalable **AWS Elastic Beanstalk (Tomcat)** Auto Scaling Group across multiple Availability Zones.
-> * **Isolated Data Layer:** Backend services (`RDS MySQL`, `ElastiCache Memcached`, `Amazon MQ`) are secured within private subnets, accessible only via strictly configured Security Groups.
-
----
 ## 🛡️ Security Architecture: Three Gates, Zero Compromise
 
 ```
@@ -244,6 +230,21 @@ GitHub    TruffleHog+tfsec+Sonar  Maven→WAR    Beanstalk
 ![Memcached Cache Hit](../media/cloud-native/app-memcached-hit.png)
 
 > **"[Data is From Cache]"** — Second request for the same user: served directly from **ElastiCache Memcached**, zero database queries. Read-through cache is working as designed — database load reduced, response time improved.
+
+---
+
+## 📊 Architecture Overview (C4 Model):**
+
+> The diagram above illustrates the complete cloud-native infrastructure and continuous delivery flow for **Strata-Ops (Phase 3)**. 
+
+![Architecture](../media/cloud-native/System.png)
+
+
+> **Key Architectural Highlights:**
+> * **Zero-Trust CI/CD:** Fully automated pipeline via AWS CodePipeline with strict security gates (TruffleHog, tfsec, SonarCloud).
+> * **Dynamic Secrets Injection:** Utilizing **AWS SSM Parameter Store** to inject database credentials at runtime, completely eliminating hardcoded secrets from the source code.
+> * **Highly Available Compute:** Java application (ROOT.war) deployed on a scalable **AWS Elastic Beanstalk (Tomcat)** Auto Scaling Group across multiple Availability Zones.
+> * **Isolated Data Layer:** Backend services (`RDS MySQL`, `ElastiCache Memcached`, `Amazon MQ`) are secured within private subnets, accessible only via strictly configured Security Groups.
 
 ---
 
