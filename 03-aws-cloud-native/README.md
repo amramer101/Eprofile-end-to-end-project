@@ -53,7 +53,7 @@ The same Java application from Phase 2 now runs on a **fully managed, auto-scali
 
 ## 🏗️ Architecture
 
-![Architecture Diagram](media/cloud-native/architecture-diagram.png)
+![Architecture Diagram](../media/cloud-native/architecture-diagram.png)
 
 > **What you're seeing:** The complete system from `git push` to production. Terraform provisions everything. The pipeline runs through 4 security-enforced stages. The VPC contains all managed services in private subnets, accessible only through the load balancer. Every secret lives in SSM — never in code.
 
@@ -61,12 +61,24 @@ The same Java application from Phase 2 now runs on a **fully managed, auto-scali
 
 ## 🌐 Network Design — VPC Resource Map
 
-![Network Design](media/cloud-native/Network-design.png)
+![Network Design](../media/cloud-native/Network-design.png)
 
 > **Eprofile-VPC** (`10.0.0.0/16`) spans **3 Availability Zones** (eu-central-1a/b/c) with 6 subnets — 3 public, 3 private. Private subnets reach the internet only via NAT Gateway. All backend services (RDS, ElastiCache, Amazon MQ) live exclusively in private subnets, unreachable from the public internet.
 
 ---
+> **📊 Architecture Overview (C4 Model):**
+> The diagram above illustrates the complete cloud-native infrastructure and continuous delivery flow for **Strata-Ops (Phase 3)**. 
 
+![Architecture](../media/cloud-native/System.png)
+
+
+> **Key Architectural Highlights:**
+> * **Zero-Trust CI/CD:** Fully automated pipeline via AWS CodePipeline with strict security gates (TruffleHog, tfsec, SonarCloud).
+> * **Dynamic Secrets Injection:** Utilizing **AWS SSM Parameter Store** to inject database credentials at runtime, completely eliminating hardcoded secrets from the source code.
+> * **Highly Available Compute:** Java application (ROOT.war) deployed on a scalable **AWS Elastic Beanstalk (Tomcat)** Auto Scaling Group across multiple Availability Zones.
+> * **Isolated Data Layer:** Backend services (`RDS MySQL`, `ElastiCache Memcached`, `Amazon MQ`) are secured within private subnets, accessible only via strictly configured Security Groups.
+
+---
 ## 🛡️ Security Architecture: Three Gates, Zero Compromise
 
 ```
@@ -115,7 +127,7 @@ BUILD STAGE ──► DEPLOY STAGE
 
 **Zero hardcoded credentials anywhere in this codebase.**
 
-![SSM Parameter Store](media/cloud-native/aws-ssm-secrets.png)
+![SSM Parameter Store](../media/cloud-native/aws-ssm-secrets.png)
 
 > **5 parameters auto-provisioned by Terraform on `terraform apply`:**
 > - `/strata-ops/mysql-password` → **SecureString** (auto-generated, KMS-encrypted)
@@ -140,7 +152,7 @@ resource "aws_ssm_parameter" "mysql_password" {
 
 ## 📦 CodeArtifact — Private Maven Proxy
 
-![CodeArtifact Repository](media/cloud-native/Code-Artifact.png)
+![CodeArtifact Repository](../media/cloud-native/Code-Artifact.png)
 
 > **`vprofile-repo`** proxies Maven Central. Packages are cached on first pull — subsequent builds are faster and independent of Maven Central availability. The build authenticates using a short-lived IAM token, never stored credentials.
 
@@ -153,7 +165,7 @@ resource "aws_ssm_parameter" "mysql_password" {
 
 ## 🚀 Pipeline: All 4 Stages Succeeded
 
-![CodePipeline Success](media/cloud-native/codepipeline-success.png)
+![CodePipeline Success](../media/cloud-native/codepipeline-success.png)
 
 > **`vprofile-pipeline` (V2)** — commit `fc31501d`. All 4 stages green: **Source** (GitHub App) → **security-scan** (AWS CodeBuild, 5 min ago) → **Build** (AWS CodeBuild, 1 min ago) → **Deploy** (AWS Elastic Beanstalk, just now). Zero manual intervention from push to production.
 
@@ -173,7 +185,7 @@ GitHub    TruffleHog+tfsec+Sonar  Maven→WAR    Beanstalk
 
 ## 🔐 Security Scan Execution Logs
 
-![Security Scan Logs](media/cloud-native/security-scan-logs.png)
+![Security Scan Logs](../media/cloud-native/security-scan-logs.png)
 
 > **What the logs prove (line by line):**
 > - **Line 394:** `trufflehog filesystem . --only-verified --fail` executes
@@ -185,7 +197,7 @@ GitHub    TruffleHog+tfsec+Sonar  Maven→WAR    Beanstalk
 
 ## 📊 SonarCloud — SAST Analysis
 
-![SonarCloud Analysis](media/cloud-native/sonarcloud-passed.png)
+![SonarCloud Analysis](../media/cloud-native/sonarcloud-passed.png)
 
 > SonarCloud analyzed **24,000 lines** of Java, CSS, and JSP. The analysis surfaced security and reliability findings in the legacy application codebase — this is exactly the value of shift-left SAST: making hidden vulnerabilities visible and trackable before they reach users. All findings are now logged in the SonarCloud dashboard as actionable items.
 
@@ -193,7 +205,7 @@ GitHub    TruffleHog+tfsec+Sonar  Maven→WAR    Beanstalk
 
 ## 🟢 Elastic Beanstalk — Health: Ok
 
-![Elastic Beanstalk Healthy](media/cloud-native/elastic-beanstalk-healthy.png)
+![Elastic Beanstalk Healthy](../media/cloud-native/elastic-beanstalk-healthy.png)
 
 > **`elbeanstalkenv`** on **Tomcat 10 + Corretto 21**, Amazon Linux 2023/5.9.3. Events log confirms the full deployment lifecycle in 74 seconds: environment started → new version deployed → instance deployment completed → health transitioned back to **Ok**. The running version is the artifact produced directly by CodePipeline — no manual upload.
 
@@ -201,7 +213,7 @@ GitHub    TruffleHog+tfsec+Sonar  Maven→WAR    Beanstalk
 
 ## 📡 CloudWatch — Observability
 
-![CloudWatch Alarm](media/cloud-native/CloudWatch.png)
+![CloudWatch Alarm](../media/cloud-native/CloudWatch.png)
 
 > **`vprofile-High-CPU-Alarm`**: `CPUUtilization >= 80` for 2 datapoints within 4 minutes. State: **OK**. When breached, CloudWatch triggers the SNS topic → developer email. The graph shows healthy CPU levels throughout the deployment, confirming the application is running well within instance capacity.
 
@@ -211,7 +223,7 @@ GitHub    TruffleHog+tfsec+Sonar  Maven→WAR    Beanstalk
 
 ### Login UI — Live on Beanstalk Endpoint
 
-![Application Login](media/cloud-native/app-login-ui.png)
+![Application Login](../media/cloud-native/app-login-ui.png)
 
 > The application is live at `eprofileapp254698.eu-central-1.elasticbeanstalk.com` — the CNAME configured in `variables.tf` (`beanstalk_cname = "eprofileapp254698"`). Deployed entirely via the pipeline.
 
@@ -219,7 +231,7 @@ GitHub    TruffleHog+tfsec+Sonar  Maven→WAR    Beanstalk
 
 ### RDS Connected + Cache Written
 
-![Database Records](media/cloud-native/app-database-records.png)
+![Database Records](../media/cloud-native/app-database-records.png)
 
 > **"Data is From DB and Data Inserted In Cache !!"** — Two confirmations in one message: the app connected to **RDS MySQL** in the private subnet (port 3306), executed a SQL query, retrieved the user record, and immediately wrote it to **ElastiCache Memcached**. The full data layer is wired and operational.
 
@@ -227,7 +239,7 @@ GitHub    TruffleHog+tfsec+Sonar  Maven→WAR    Beanstalk
 
 ### ElastiCache Cache Hit
 
-![Memcached Cache Hit](media/cloud-native/app-memcached-hit.png)
+![Memcached Cache Hit](../media/cloud-native/app-memcached-hit.png)
 
 > **"[Data is From Cache]"** — Second request for the same user: served directly from **ElastiCache Memcached**, zero database queries. Read-through cache is working as designed — database load reduced, response time improved.
 
@@ -301,17 +313,6 @@ terraform destroy -auto-approve
 ├── buildspec-build.yml      # Maven → ROOT.war
 ├── buildspec-sec.yml        # TruffleHog + tfsec + SonarCloud
 └── src/                     # Java application source
-```
-
----
-
-## 🔄 The Strata-Ops Journey
-
-```
-✅ Phase 1 — Manual Local      Vagrant VMs, shell scripts
-✅ Phase 2 — AWS Lift & Shift  EC2, Prometheus, Grafana
-✅ Phase 3 — Cloud-Native  ◄── YOU ARE HERE
-⬜ Phase 4 — Containerized     Docker, Kubernetes
 ```
 
 ---
