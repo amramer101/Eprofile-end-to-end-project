@@ -327,7 +327,6 @@ resource "aws_vpc_security_group_ingress_rule" "allow_9090_from_grafana-SG_prome
 }
 
 
-
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_prometheus" {
   security_group_id = aws_security_group.prometheus-SG.id
   cidr_ipv4         = "0.0.0.0/0"

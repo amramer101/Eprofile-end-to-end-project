@@ -150,7 +150,7 @@ module "ec2_instance_mysql" {
 
 }
 
-
+#### ---------------------------------------------------------------------------------------
 
 ### EC2 Instance for Jenkins Server
 
@@ -233,3 +233,63 @@ module "ec2_instance_nexus" {
 
 }
 
+#### ---------------------------------------------------------------------------------------
+
+
+### EC2 Instance for Prometheus Server
+
+module "ec2_instance_prometheus" {
+  source = "terraform-aws-modules/ec2-instance/aws"
+
+  name = "prometheus-instance"
+
+  instance_type          = "t2.micro"
+  ami                    = data.aws_ami.ubuntu22.id
+  vpc_security_group_ids = [aws_security_group.prometheus-SG.id]
+  key_name               = aws_key_pair.monitor_key_pair.key_name
+  monitoring             = false
+  subnet_id              = module.vpc.public_subnets[1]
+  create_security_group  = false
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+
+  user_data            = templatefile("${path.module}/templates/setup-prometheus.sh", {
+    frontend_ip = module.ec2_instance_nginx.private_ip
+    tomcat_ip   = module.ec2_instance_tomcat.private_ip
+    data_ip     = module.ec2_instance_mysql.private_ip
+  })
+
+
+
+  depends_on = [ module.ec2_instance_tomcat, module.ec2_instance_mysql, module.ec2_instance_nginx ]
+
+}
+
+
+### EC2 Instance for Grafana Server
+
+module "ec2_instance_grafana" {
+  source = "terraform-aws-modules/ec2-instance/aws"
+
+  name = "grafana-instance"
+
+  instance_type          = "t2.micro"
+  ami                    = data.aws_ami.ubuntu22.id
+  vpc_security_group_ids = [aws_security_group.prometheus-SG.id]
+  key_name               = aws_key_pair.monitor_key_pair.key_name
+  monitoring             = false
+  subnet_id              = module.vpc.public_subnets[1]
+  create_security_group  = false
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+
+  user_data            = file("../userdata-EC2/Grafana.sh")
+  depends_on = [ module.ec2_instance_prometheus ]
+
+}
