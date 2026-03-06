@@ -30,13 +30,21 @@ variable "AWS_Zone-c" {
   default = "eu-central-1c"
 }
 
+####  Key Pair Variables
 
 variable "Pub_Key_Path" {
   default = "ec2-eprofile-key.pub"
 }
 
-
 variable "Pub_Key_Path_ci" {
   default = "ci-key.pub"
 }
 
+variable "Pub_Key_Path_monitor" {
+  default = "monitor-key.pub"
+}
+
+### Slack Channel (For Notifications)
+variable "slack-token" {
+  default = "YfMi7uwL9nrgbCUn0kP9wJgC"
+}

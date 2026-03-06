@@ -276,3 +276,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_nexus" {
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
+##### ---------------------------------------------------------------------------------------------------------------------------
+
+
+#### Security Group for the Prometheus EC2s Instance

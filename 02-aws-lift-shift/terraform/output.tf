@@ -23,11 +23,13 @@ output "internal_ips" {
   }
 }
 
+
+## 4. Service URLs (For Accessing Services) C/CD Pipeline, Monitoring, etc.
+
 output "nexus_ip" {
   description = "The public IP of the nexus host"
   value       = "http://${module.ec2_instance_nexus.public_ip}:8081"
 }
-
 
 output "jenkins_ip" {
   description = "The public IP of the jenkins host"
@@ -38,4 +40,16 @@ output "jenkins_ip" {
 output "sonar_ip" {
   description = "The public IP of the Sonar host"
   value       = "http://${module.ec2_instance_sonarqube.public_ip}:9000"
+}
+
+
+output "prometheus_ip" {
+  description = "The public IP of the Prometheus host"
+  value       = "http://${module.ec2_instance_prometheus.public_ip}:9090"
+} 
+
+output "grafana_ip" { 
+  description = "The public IP of the Grafana host"
+  value       = "http://${module.ec2_instance_grafana.public_ip}:3000"
+  
 }
