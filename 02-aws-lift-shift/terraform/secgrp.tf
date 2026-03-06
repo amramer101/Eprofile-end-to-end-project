@@ -37,6 +37,15 @@ resource "aws_vpc_security_group_ingress_rule" "allow_http" {
   to_port           = 80
 }
 
+
+resource "aws_vpc_security_group_ingress_rule" "allow_9100_from_prometheus-SG_frontend" {
+  security_group_id            = aws_security_group.Frontend-SG.id
+  referenced_security_group_id = aws_security_group.prometheus-SG.id
+  from_port                    = 9100
+  ip_protocol                  = "tcp"
+  to_port                      = 9100
+}
+
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_frontend" {
   security_group_id = aws_security_group.Frontend-SG.id
   cidr_ipv4         = "0.0.0.0/0"
@@ -83,6 +92,14 @@ resource "aws_vpc_security_group_ingress_rule" "allow_8080_from_frontend" {
   to_port           = 8080
 }
 
+
+resource "aws_vpc_security_group_ingress_rule" "allow_9100_from_prometheus-SG_tomcat" {
+  security_group_id            = aws_security_group.Tomcat-SG.id
+  referenced_security_group_id = aws_security_group.prometheus-SG.id
+  from_port                    = 9100
+  ip_protocol                  = "tcp"
+  to_port                      = 9100
+}
 
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_tomcat" {
@@ -138,6 +155,15 @@ resource "aws_vpc_security_group_ingress_rule" "allow_5672_from_tomcat-SG" {
   to_port                      = 5672
 }
 
+
+resource "aws_vpc_security_group_ingress_rule" "allow_9100_from_prometheus-SG_Data" {
+  security_group_id            = aws_security_group.Data-SG.id
+  referenced_security_group_id = aws_security_group.prometheus-SG.id
+  from_port                    = 9100
+  ip_protocol                  = "tcp"
+  to_port                      = 9100
+}
+
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_Data" {
   security_group_id = aws_security_group.Data-SG.id
   cidr_ipv4         = "0.0.0.0/0"
@@ -175,8 +201,6 @@ resource "aws_vpc_security_group_ingress_rule" "allow_8080_jenkins" {
   ip_protocol       = "tcp"
   to_port           = 8080
 }
-
-
 
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_jenkins" {
@@ -217,13 +241,6 @@ resource "aws_vpc_security_group_ingress_rule" "allow_80_sonar" {
   to_port           = 80
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_80_from_jenkins" {
-  security_group_id            = aws_security_group.sonar-SG.id
-  referenced_security_group_id = aws_security_group.jenkins-SG.id
-  from_port                    = 80
-  ip_protocol                  = "tcp"
-  to_port                      = 80
-}
 
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_sonar" {
   security_group_id = aws_security_group.sonar-SG.id
@@ -253,13 +270,6 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_nexus" {
   to_port           = 22
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_8081_from_jenkins" {
-  security_group_id            = aws_security_group.nexus-SG.id
-  referenced_security_group_id = aws_security_group.jenkins-SG.id
-  from_port                    = 8081
-  ip_protocol                  = "tcp"
-  to_port                      = 8081
-}
 
 resource "aws_vpc_security_group_ingress_rule" "allow_8081_from_nexus" {
   security_group_id = aws_security_group.nexus-SG.id
@@ -276,7 +286,89 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_nexus" {
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
+
 ##### ---------------------------------------------------------------------------------------------------------------------------
 
-
 #### Security Group for the Prometheus EC2s Instance
+
+resource "aws_security_group" "prometheus-SG" {
+  name        = "prometheus-SG"
+  description = "Allow ssh and 9090 inbound traffic from Frontend and all outbound traffic"
+  vpc_id      = module.vpc.vpc_id
+
+  tags = {
+    Name = "prometheus-SG"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_prometheus" {
+  security_group_id = aws_security_group.prometheus-SG.id
+  cidr_ipv4         = local.my_public_ip_cidr
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
+
+resource "aws_vpc_security_group_ingress_rule" "allow_9090_prometheus" {
+  security_group_id = aws_security_group.prometheus-SG.id
+  cidr_ipv4         = local.my_public_ip_cidr
+  from_port         = 9090
+  ip_protocol       = "tcp"
+  to_port           = 9090
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_9090_from_grafana-SG_prometheus" {
+  security_group_id            = aws_security_group.prometheus-SG.id
+  referenced_security_group_id = aws_security_group.Grafana-SG.id
+  from_port                    = 9090
+  ip_protocol                  = "tcp"
+  to_port                      = 9090
+}
+
+
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_prometheus" {
+  security_group_id = aws_security_group.prometheus-SG.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" # semantically equivalent to all ports
+}
+
+
+
+## ### Security Group for the Grafana EC2s Instance
+
+
+resource "aws_security_group" "Grafana-SG" {
+  name        = "Grafana-SG"
+  description = "Allow ssh and 3000 inbound traffic from Frontend and all outbound traffic"
+  vpc_id      = module.vpc.vpc_id
+
+  tags = {
+    Name = "Grafana-SG"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_grafana" {
+  security_group_id = aws_security_group.Grafana-SG.id
+  cidr_ipv4         = local.my_public_ip_cidr
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+
+
+resource "aws_vpc_security_group_ingress_rule" "allow_3000_grafana" {
+  security_group_id = aws_security_group.Grafana-SG.id
+  cidr_ipv4         = local.my_public_ip_cidr
+  from_port         = 3000
+  ip_protocol       = "tcp"
+  to_port           = 3000
+}
+
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_grafana" {
+  security_group_id = aws_security_group.Grafana-SG.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" # semantically equivalent to all ports
+}
