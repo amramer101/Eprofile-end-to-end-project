@@ -256,19 +256,7 @@ module "ec2_instance_prometheus" {
     Environment = "dev"
   }
 
-<<<<<<< HEAD
   user_data            = file("../userdata-EC2/setup-prometheus.sh")
-=======
-  user_data = templatefile("${path.module}/templates/setup-prometheus.sh", {
-    frontend_ip = module.ec2_instance_nginx.private_ip
-    tomcat_ip   = module.ec2_instance_tomcat.private_ip
-    mysql_ip     = module.ec2_instance_mysql.private_ip
-    memcache_ip  = module.ec2_instance_memcache.private_ip
-    rabbitmq_ip  = module.ec2_instance_rabbitmq.private_ip
-  })
-
-
->>>>>>> 2a953e7b6aa1333c1d8a6b388379239e2e9edc54
 
   depends_on = [module.ec2_instance_tomcat, module.ec2_instance_mysql, module.ec2_instance_nginx]
 
