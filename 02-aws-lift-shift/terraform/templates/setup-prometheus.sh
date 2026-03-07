@@ -10,7 +10,7 @@ set -e
 echo "prometheus" > /etc/hostname
 hostname prometheus
 
-# Variables
+# Variables (Escaped for Terraform using $$)
 PROM_VERSION="3.5.0"
 DOWNLOAD_URL="https://github.com/prometheus/prometheus/releases/download/v$${PROM_VERSION}/prometheus-$${PROM_VERSION}.linux-amd64.tar.gz"
 TAR_FILE="prometheus-$${PROM_VERSION}.linux-amd64.tar.gz"
