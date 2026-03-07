@@ -109,11 +109,19 @@ scrape_configs:
   - job_name: "strata_ops_nodes"
     static_configs:
       - targets:
+<<<<<<< HEAD:02-aws-lift-shift/userdata-EC2/setup-prometheus.sh
         - "${db01.eprofile.in}:9100"
         - "${app01.eprofile.in}:9100"
         - "${nginx.eprofile.in}:9100"
         - "${mc01.eprofile.in}:9100"
         - "${rmq01.eprofile.in}:9100"        
+=======
+        - "${frontend_ip}:9100"
+        - "${tomcat_ip}:9100"
+        - "${mysql_ip}:9100"
+        - "${memcache_ip}:9100"
+        - "${rabbitmq_ip}:9100"        
+>>>>>>> 2a953e7b6aa1333c1d8a6b388379239e2e9edc54:02-aws-lift-shift/terraform/templates/setup-prometheus.sh
 EOF
 
 systemctl restart prometheus

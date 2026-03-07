@@ -73,6 +73,7 @@ if [ ! -f "$INITIAL_PASSWORD_FILE" ]; then
 fi
 INITIAL_PASS=$(cat "$INITIAL_PASSWORD_FILE")
 echo "Initial password retrieved."
+<<<<<<< HEAD
 
 # 7. Change password to fixed value (admin123) for demo purposes
 echo "Changing admin password to admin123..."
@@ -96,6 +97,26 @@ aws ssm get-parameter \
   --query "Parameter.Value" \
   --output text \
   --region eu-central-1
+=======
+
+# 7. Change password to fixed value (admin123) for demo purposes
+echo "Changing admin password to admin123..."
+curl -s -u "admin:$INITIAL_PASS" -X PUT \
+  "http://localhost:8081/service/rest/v1/security/users/admin/change-password" \
+  -H "content-type: text/plain" \
+  -d 'admin123'
+echo "Password changed!"
+
+
+# 8. Push NEW password to SSM 
+aws ssm put-parameter \
+  --name "/strata-ops/nexus-password" \
+  --value "admin123" \     
+  --type "SecureString" \
+  --overwrite \
+  --region eu-central-1
+echo "Nexus password pushed to SSM."
+>>>>>>> 2a953e7b6aa1333c1d8a6b388379239e2e9edc54
 
 
 # 9. Create vprofile-repo
