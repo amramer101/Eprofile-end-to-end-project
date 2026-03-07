@@ -83,14 +83,19 @@ curl -s -u "admin:$INITIAL_PASS" -X PUT \
 echo "Password changed!"
 
 
-# 8. Push NEW password to SSM 
 aws ssm put-parameter \
   --name "/strata-ops/nexus-password" \
-  --value "admin123" \     
+  --value "admin123" \
   --type "SecureString" \
   --overwrite \
   --region eu-central-1
-echo "Nexus password pushed to SSM."
+
+aws ssm get-parameter \
+  --name "/strata-ops/nexus-password" \
+  --with-decryption \
+  --query "Parameter.Value" \
+  --output text \
+  --region eu-central-1
 
 
 # 9. Create vprofile-repo
