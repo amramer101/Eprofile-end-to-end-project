@@ -68,11 +68,11 @@ resource "aws_security_group" "Tomcat-SG" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_tomcat" {
-  security_group_id = aws_security_group.Tomcat-SG.id
+  security_group_id            = aws_security_group.Tomcat-SG.id
   referenced_security_group_id = aws_security_group.jenkins-SG.id
-  from_port         = 22
-  ip_protocol       = "tcp"
-  to_port           = 22
+  from_port                    = 22
+  ip_protocol                  = "tcp"
+  to_port                      = 22
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_tomcat_from_my_ip" {
@@ -85,11 +85,11 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4_tomcat_from_my_ip
 
 
 resource "aws_vpc_security_group_ingress_rule" "allow_8080_from_frontend" {
-  security_group_id = aws_security_group.Tomcat-SG.id
+  security_group_id            = aws_security_group.Tomcat-SG.id
   referenced_security_group_id = aws_security_group.Frontend-SG.id
-  from_port         = 8080
-  ip_protocol       = "tcp"
-  to_port           = 8080
+  from_port                    = 8080
+  ip_protocol                  = "tcp"
+  to_port                      = 8080
 }
 
 

@@ -46,10 +46,10 @@ output "sonar_ip" {
 output "prometheus_ip" {
   description = "The public IP of the Prometheus host"
   value       = "http://${module.ec2_instance_prometheus.public_ip}:9090"
-} 
+}
 
-output "grafana_ip" { 
+output "grafana_ip" {
   description = "The public IP of the Grafana host"
   value       = "http://${module.ec2_instance_grafana.public_ip}:3000"
-  
+
 }

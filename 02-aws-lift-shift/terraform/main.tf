@@ -256,7 +256,7 @@ module "ec2_instance_prometheus" {
     Environment = "dev"
   }
 
-  user_data            = templatefile("${path.module}/templates/setup-prometheus.sh", {
+  user_data = templatefile("${path.module}/templates/setup-prometheus.sh", {
     frontend_ip = module.ec2_instance_nginx.private_ip
     tomcat_ip   = module.ec2_instance_tomcat.private_ip
     data_ip     = module.ec2_instance_mysql.private_ip
@@ -264,7 +264,7 @@ module "ec2_instance_prometheus" {
 
 
 
-  depends_on = [ module.ec2_instance_tomcat, module.ec2_instance_mysql, module.ec2_instance_nginx ]
+  depends_on = [module.ec2_instance_tomcat, module.ec2_instance_mysql, module.ec2_instance_nginx]
 
 }
 
@@ -290,11 +290,11 @@ module "ec2_instance_grafana" {
   }
 
 
-  user_data            = templatefile("${path.module}/templates/Grafana.sh", {
+  user_data = templatefile("${path.module}/templates/Grafana.sh", {
     prometheus_ip = module.ec2_instance_prometheus.private_ip
   })
 
 
-  depends_on = [ module.ec2_instance_prometheus ]
+  depends_on = [module.ec2_instance_prometheus]
 
 }

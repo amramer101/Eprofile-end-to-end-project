@@ -59,7 +59,7 @@ resource "aws_ssm_parameter" "github_key" {
 resource "aws_ssm_parameter" "sonar_token" {
   name  = "/strata-ops/sonar-token"
   type  = "SecureString"
-  value = "pending" 
+  value = "pending"
   lifecycle { ignore_changes = [value] }
 }
 
