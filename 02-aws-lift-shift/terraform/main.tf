@@ -259,7 +259,9 @@ module "ec2_instance_prometheus" {
   user_data = templatefile("${path.module}/templates/setup-prometheus.sh", {
     frontend_ip = module.ec2_instance_nginx.private_ip
     tomcat_ip   = module.ec2_instance_tomcat.private_ip
-    data_ip     = module.ec2_instance_mysql.private_ip
+    mysql_ip    = module.ec2_instance_mysql.private_ip
+    memcache_ip = module.ec2_instance_memcache.private_ip
+    rabbitmq_ip = module.ec2_instance_rabbitmq.private_ip
   })
 
 
@@ -278,7 +280,7 @@ module "ec2_instance_grafana" {
 
   instance_type          = "t2.micro"
   ami                    = data.aws_ami.ubuntu22.id
-  vpc_security_group_ids = [aws_security_group.prometheus-SG.id]
+  vpc_security_group_ids = [aws_security_group.Grafana-SG.id]
   key_name               = aws_key_pair.monitor_key_pair.key_name
   monitoring             = false
   subnet_id              = module.vpc.public_subnets[1]

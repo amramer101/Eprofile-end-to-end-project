@@ -46,5 +46,7 @@ variable "Pub_Key_Path_monitor" {
 
 ### Slack Channel (For Notifications)
 variable "slack-token" {
-  default = "YfMi7uwL9nrgbCUn0kP9wJgC"
+  description = "Slack token"
+  type        = string
+  sensitive   = true
 }

@@ -54,13 +54,16 @@ systemctl daemon-reload
 systemctl enable nexus
 systemctl start nexus
 
+
+
 # 5. Wait for Nexus to Start
-echo "Waiting for Nexus to start (2-3 minutes)..."
+echo "Waiting for Nexus to start..."
 while [[ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8081/)" != "200" ]]; do
   echo "Still waiting..." >&2
   sleep 15
 done
 echo "Nexus is UP!"
+
 
 # 6. Get initial password
 INITIAL_PASSWORD_FILE="/opt/nexus/sonatype-work/nexus3/admin.password"
@@ -69,23 +72,32 @@ if [ ! -f "$INITIAL_PASSWORD_FILE" ]; then
     exit 1
 fi
 INITIAL_PASS=$(cat "$INITIAL_PASSWORD_FILE")
-echo "Initial password: $INITIAL_PASS"
+echo "Initial password retrieved."
 
-# Push initial password to SSM so Jenkins can use it
+# 7. Change password to fixed value (admin123) for demo purposes
+echo "Changing admin password to admin123..."
+curl -s -u "admin:$INITIAL_PASS" -X PUT \
+  "http://localhost:8081/service/rest/v1/security/users/admin/change-password" \
+  -H "content-type: text/plain" \
+  -d 'admin123'
+echo "Password changed!"
+
+
+# 8. Push NEW password to SSM 
 aws ssm put-parameter \
   --name "/strata-ops/nexus-password" \
-  --value "$INITIAL_PASS" \
+  --value "admin123" \     
   --type "SecureString" \
   --overwrite \
   --region eu-central-1
-
 echo "Nexus password pushed to SSM."
 
-# 7. Create vprofile-repo
+
+# 9. Create vprofile-repo
 echo "Creating vprofile-repo..."
 sleep 10
 
-curl -s -u "admin:$INITIAL_PASS" -X POST \
+curl -s -u "admin:admin123" -X POST \
   "http://localhost:8081/service/rest/v1/repositories/maven/hosted" \
   -H "Content-Type: application/json" \
   -d '{

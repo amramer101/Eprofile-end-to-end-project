@@ -111,7 +111,9 @@ scrape_configs:
       - targets:
         - "${frontend_ip}:9100"
         - "${tomcat_ip}:9100"
-        - "${data_ip}:9100"
+        - "${mysql_ip}:9100"
+        - "${memcache_ip}:9100"
+        - "${rabbitmq_ip}:9100"        
 EOF
 
 systemctl restart prometheus
