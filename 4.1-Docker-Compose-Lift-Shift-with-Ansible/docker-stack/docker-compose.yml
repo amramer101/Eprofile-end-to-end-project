@@ -1,0 +1,95 @@
+
+## Docker Compose file for VProfile application stack
+services:
+  ## ----------------- Backend Services (Internal) -----------------
+  vprodb:
+    build: 
+      context: ./Docker-files/db
+
+    image: vprocontainers/vprofiledb 
+    container_name: vprodb
+    ports:
+      - "3306:3306"
+    volumes:
+      - vprodbdata:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD} ## From.env file
+    networks:
+      - backend_net
+
+  vprocache01:
+    image: memcached
+    container_name: vprocache01
+    ports:
+      - "11211:11211"
+    networks:
+      - backend_net
+
+  vpromq01:
+    image: rabbitmq:3-management
+    container_name: vpromq01
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RMQ_USER} ## From .env file
+      - RABBITMQ_DEFAULT_PASS=${RMQ_PASS}
+    networks:
+      - backend_net
+
+  # ----------------- Application Service (The Bridge) -----------------
+  vproapp:
+    build: 
+      context: ../../ ## Set context to root of the project to access all source code and resources for building the application image
+      
+      dockerfile: 4.1-Docker-Compose-Lift-Shift-with-Ansible/docker-stack/Docker-files/tomcat/Dockerfile
+    
+    image: vprocontainers/vprofileapp
+    container_name: vproapp
+    ports:
+      - "8080:8080"
+    volumes:
+      - vproappdata:/usr/local/tomcat/webapps
+
+    environment:
+
+      - RDS_HOSTNAME=vprodb
+      - MEMCACHED_HOSTNAME=vprocache01
+      - RABBITMQ_HOSTNAME=vpromq01
+
+      - RDS_USERNAME=${DB_USERNAME}
+      - RDS_PASSWORD=${DB_PASSWORD}
+      - RABBITMQ_USER=${RMQ_USER}
+      - RABBITMQ_PASS=${RMQ_PASS}
+
+    depends_on:
+      - vprodb
+      - vprocache01
+      - vpromq01
+    networks:
+      - frontend_net
+      - backend_net
+
+  # ----------------- Frontend Service (Public Facing) -----------------
+  vproweb:
+    build: 
+      context: ./Docker-files/web
+    image: vprocontainers/vprofileweb
+    container_name: vproweb
+    ports:
+      - "80:80"
+    depends_on:
+      - vproapp
+    networks:
+      - frontend_net
+
+# ----------------- Volumes & Networks Definition -----------------
+volumes:
+  vprodbdata: {}
+  vproappdata: {}
+
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    internal: true
