@@ -7,7 +7,7 @@ services:
       context: ../../ ## Set context to root of the project to access all source code and resources for building the application image
       dockerfile: 4.1-Docker-Compose-Lift-Shift-with-Ansible/docker-stack/Docker-files/db/Dockerfile
 
-    image: vprocontainers/vprofiledb 
+    image: amr101/vprofiledb 
     container_name: vprodb
     ports:
       - "3306:3306"
@@ -44,11 +44,13 @@ services:
 
   # ----------------- Application Service (The Bridge) -----------------
   vproapp:
-    build: 
+    restart: always
+    build:
+
       context: ../../ 
       dockerfile: 4.1-Docker-Compose-Lift-Shift-with-Ansible/docker-stack/Docker-files/tomcat/Dockerfile
     
-    image: vprocontainers/vprofileapp
+    image: amr101/vprofileapp
     container_name: vproapp
     ports:
       - "8080:8080"
@@ -58,13 +60,15 @@ services:
     environment:
 
       - RDS_HOSTNAME=vprodb ## Using service name as hostname for internal communication within Docker network
-      - MEMCACHED_HOSTNAME=vprocache01
-      - RABBITMQ_HOSTNAME=vpromq01
-
       - RDS_USERNAME=${DB_USERNAME}
       - RDS_PASSWORD=${DB_PASSWORD}
+
+      - MEMCACHED_HOSTNAME=vprocache01
+
+      - RABBITMQ_HOSTNAME=vpromq01
       - RABBITMQ_USER=${RMQ_USER}
       - RABBITMQ_PASS=${RMQ_PASS}
+
 
     depends_on:
       - vprodb
@@ -77,8 +81,8 @@ services:
   # ----------------- Frontend Service (Public Facing) -----------------
   vproweb:
     build: 
-      context: ./Docker-files/web
-    image: vprocontainers/vprofileweb
+      context: ./Docker-files/nginx
+    image: amr101/vprofileweb
     container_name: vproweb
     ports:
       - "80:80"
