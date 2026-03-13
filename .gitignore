@@ -28,3 +28,6 @@ bean-stack-key
 ci-key
 aws-2-github
 monitor-key
+
+# docker files
+.env
