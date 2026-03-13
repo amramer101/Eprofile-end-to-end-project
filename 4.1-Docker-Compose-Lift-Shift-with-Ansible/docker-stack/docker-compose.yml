@@ -14,8 +14,8 @@ services:
     volumes:
       - vprodbdata:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=SuperSecretRootPass123
-      - MYSQL_DATABASE=accounts
+      - MYSQL_ROOT_PASSWORD=${ROOT_PASSWORD} ## From .env file
+      - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USERNAME} 
       - MYSQL_PASSWORD=${DB_PASSWORD}
 
@@ -58,7 +58,7 @@ services:
 
     environment:
 
-      - RDS_HOSTNAME=vprodb
+      - RDS_HOSTNAME=vprodb ## Using service name as hostname for internal communication within Docker network
       - MEMCACHED_HOSTNAME=vprocache01
       - RABBITMQ_HOSTNAME=vpromq01
 
