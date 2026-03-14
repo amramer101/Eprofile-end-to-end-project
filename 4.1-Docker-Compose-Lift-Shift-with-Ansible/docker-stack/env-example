@@ -1,0 +1,11 @@
+## Environment variables for Docker Compose stack
+
+## Database credentials
+ROOT_PASSWORD=rootpassword
+DB_NAME=accounts
+DB_USERNAME=user
+DB_PASSWORD=password
+
+## RabbitMQ credentials
+RMQ_USER=user
+RMQ_PASS=password
