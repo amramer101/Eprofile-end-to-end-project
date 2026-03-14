@@ -1,7 +1,7 @@
 
-## Docker Compose file for VProfile application stack
+## Docker Compose file for VProfile application stack --- Development Version (Optimized for Local Testing)
 services:
-  ## ----------------- Backend Services (Internal) -----------------
+  ## ----------------- Database Services (Internal) -----------------
   vprodb:
     build: 
       context: ../../ ## Set context to root of the project to access all source code and resources for building the application image
@@ -22,6 +22,13 @@ services:
     networks:
       - backend_net
 
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+## ----------------- Cache Service (Internal) -----------------
   vprocache01:
     image: memcached
     container_name: vprocache01
@@ -29,7 +36,12 @@ services:
       - "11211:11211"
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 11211 || exit 1"]      interval: 30s
+      timeout: 10s
+      retries: 5
 
+## ----------------- Message Queue Service (Internal) -----------
   vpromq01:
     image: rabbitmq:3-management
     container_name: vpromq01
@@ -42,9 +54,15 @@ services:
     networks:
       - backend_net
 
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+
   # ----------------- Application Service (The Bridge) -----------------
   vproapp:
-    restart: always
     build:
 
       context: ../../ 
@@ -69,15 +87,23 @@ services:
       - RABBITMQ_USER=${RMQ_USER}
       - RABBITMQ_PASS=${RMQ_PASS}
 
-
     depends_on:
-      - vprodb
-      - vprocache01
-      - vpromq01
+       vprodb:
+         condition: service_healthy
+       vprocache01:
+         condition: service_healthy
+       vpromq01:
+         condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
     networks:
       - frontend_net
       - backend_net
-
   # ----------------- Frontend Service (Public Facing) -----------------
   vproweb:
     build: 
@@ -86,8 +112,11 @@ services:
     container_name: vproweb
     ports:
       - "80:80"
+      
     depends_on:
-      - vproapp
+      vproapp:
+        condition: service_healthy
+
     networks:
       - frontend_net
 

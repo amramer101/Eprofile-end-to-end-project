@@ -1,7 +1,7 @@
 - name: Setup Docker and Deploy Vprofile Stack
   hosts: all
   become: true
-  remote_user: ubuntu
+  remote_user: ubuntu ## 'ubuntu' is the default user for the EC2 instance
 
   tasks:
     - name: Update APT cache and install dependencies
@@ -39,12 +39,12 @@
         groups: docker
         append: yes
 
-    # ======== Deployment
+## ======== Deployment
     
     - name: Copy docker-stack folder to EC2
       copy:
-        src: ../docker-stack/docker-compose.prod.yml
-        dest: /home/ubuntu/docker-stack/docker-compose.prod.yml
+        src: ../docker-stack/
+        dest: /home/ubuntu/docker-stack/
         owner: ubuntu
         group: ubuntu
         mode: '0755'

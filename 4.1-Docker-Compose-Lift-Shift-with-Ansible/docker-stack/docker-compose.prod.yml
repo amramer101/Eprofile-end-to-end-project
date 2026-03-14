@@ -1,9 +1,9 @@
 
-## Docker Compose file for VProfile application stack
+## Docker Compose file for VProfile application stack - Production Version (Optimized for Deployment)
 services:
-  ## ----------------- Backend Services (Internal) -----------------
+  ## ----------------- Database Services (Internal) -----------------
   vprodb:
-    image: amrmamer/vprofiledb 
+    image: amrmamer/vprofiledb ## Using pre-built image from Docker Hub for production stability
     container_name: vprodb
     ports:
       - "3306:3306"
@@ -18,6 +18,13 @@ services:
     networks:
       - backend_net
 
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+## ----------------- Cache Service (Internal) -----------------
   vprocache01:
     image: memcached
     container_name: vprocache01
@@ -25,7 +32,12 @@ services:
       - "11211:11211"
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 11211 || exit 1"]      interval: 30s
+      timeout: 10s
+      retries: 5
 
+## ----------------- Message Queue Service (Internal) -----------
   vpromq01:
     image: rabbitmq:3-management
     container_name: vpromq01
@@ -37,10 +49,14 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RMQ_PASS}
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   # ----------------- Application Service (The Bridge) -----------------
   vproapp:
-    restart: always
     image: amrmamer/vprofileapp
     container_name: vproapp
     ports:
@@ -60,11 +76,20 @@ services:
       - RABBITMQ_USER=${RMQ_USER}
       - RABBITMQ_PASS=${RMQ_PASS}
 
-
     depends_on:
-      - vprodb
-      - vprocache01
-      - vpromq01
+       vprodb:
+         condition: service_healthy
+       vprocache01:
+         condition: service_healthy
+       vpromq01:
+         condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
     networks:
       - frontend_net
       - backend_net
@@ -76,7 +101,8 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - vproapp
+      vproapp:
+        condition: service_healthy
     networks:
       - frontend_net
 
