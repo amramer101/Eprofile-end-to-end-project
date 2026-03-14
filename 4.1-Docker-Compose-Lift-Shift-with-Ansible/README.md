@@ -286,7 +286,7 @@ terraform destroy -auto-approve
 
 <div align="center">
 
-![Docker Images](media/Docker-compose/Artifact-Management-Custom-Docker-Images-Deployed.png)
+![Docker Images](../media/Docker-compose/Artifact-Management-Custom-Docker-Images-Deployed.png)
 
 </div>
 
@@ -298,7 +298,7 @@ All 5 custom images successfully pulled and running on the EC2 instance. The thr
 
 <div align="center">
 
-![Ansible Playbook](media/Docker-compose/Automation-Success-Ansible-Playbook-Execution.png)
+![Ansible Playbook](../media/Docker-compose/Automation-Success-Ansible-Playbook-Execution.png)
 
 </div>
 
@@ -310,7 +310,7 @@ The Ansible playbook executed flawlessly against the EC2 instance at `35.157.30.
 
 <div align="center">
 
-![Docker Compose PS](media/Docker-compose/Container-Orchestration-100-Healthy-Stack.png)
+![Docker Compose PS](../media/Docker-compose/Container-Orchestration-100-Healthy-Stack.png)
 
 </div>
 
@@ -322,7 +322,7 @@ All 5 containers are `Up` and `(healthy)` — including the critical dependency 
 
 <div align="center">
 
-![Application Running](media/Docker-compose/The-End-Result-Public-Facing-Application.png)
+![Application Running](../media/Docker-compose/The-End-Result-Public-Facing-Application.png)
 
 </div>
 
