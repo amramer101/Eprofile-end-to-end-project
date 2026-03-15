@@ -31,10 +31,10 @@ module "alb" {
       protocol    = "HTTP"
       port        = 8080
       target_type = "ip"
-      
+
       health_check = {
         enabled             = true
-        path                = "/" 
+        path                = "/"
         port                = "traffic-port"
         healthy_threshold   = 3
         unhealthy_threshold = 3

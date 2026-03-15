@@ -24,7 +24,7 @@ resource "aws_db_instance" "RDS" {
   publicly_accessible    = false
   skip_final_snapshot    = true
   username               = var.db_user_name
-  password               = aws_ssm_parameter.mysql_password.value
+  password               = random_password.db_password.result
   db_subnet_group_name   = aws_db_subnet_group.RDS_subnet_group.name
   vpc_security_group_ids = [aws_security_group.Data-SG.id]
 
@@ -75,6 +75,6 @@ resource "aws_mq_broker" "RabbitMQ" {
   auto_minor_version_upgrade = true
   user {
     username = var.rmq_user
-    password = aws_ssm_parameter.rabbitmq_password.value
+    password = random_password.rmq_password.result
   }
 }

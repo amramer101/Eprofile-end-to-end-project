@@ -22,7 +22,7 @@ resource "aws_security_group" "ECS-SG" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_80_from_frontend" {
-  security_group_id = aws_security_group.ECS-SG.id 
+  security_group_id            = aws_security_group.ECS-SG.id
   referenced_security_group_id = module.alb.security_group_id
   from_port                    = 8080
   ip_protocol                  = "tcp"

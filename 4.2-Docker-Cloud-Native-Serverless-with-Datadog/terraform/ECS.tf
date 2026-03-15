@@ -19,7 +19,7 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
   memory                   = 1024
   
   # Role for SSM
-  execution_role_arn       = aws_iam_role.ecs_execution_role.arn 
+  execution_role_arn       = aws_iam_role.ecs_execution.arn 
 
   container_definitions = jsonencode([
     {
@@ -32,6 +32,49 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
         {
           containerPort = 8080
           protocol      = "tcp"
+        }
+      ]
+
+      secrets = [
+        {
+          name      = "RDS_PASSWORD"
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/strata-ops/mysql-password"
+        },
+        {
+          name      = "RABBITMQ_PASSWORD"
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/strata-ops/rabbitmq-password"
+        }
+
+      ]
+
+      environment = [
+        {
+          name  = "RDS_HOSTNAME"
+          value = aws_db_instance.RDS.address
+        },
+        {
+          name  = "RDS_DB_NAME"
+          value = var.db_name
+        },
+        {
+          name  = "RDS_USERNAME"
+          value = var.db_user_name
+        },        
+        {
+          name  = "RABBITMQ_HOSTNAME"
+          value     = split(":", split("//", aws_mq_broker.RabbitMQ.instances[0].endpoints[0])[1])[0]
+        },
+        {
+          name  = "RABBITMQ_USERNAME"
+          value     = var.rmq_user
+        },
+        {
+          name  = "RABBITMQ_PORT"
+          value     = "5672"
+        },
+        {
+          name  = "MEMCACHED_HOSTNAME"
+          value     = aws_elasticache_cluster.ElastiCache.cluster_address
         }
       ]
     }
