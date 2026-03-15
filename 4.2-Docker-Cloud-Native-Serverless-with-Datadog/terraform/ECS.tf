@@ -15,9 +15,8 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
   family                   = "eprofile-tomcat-task"
   requires_compatibilities = ["FARGATE"] # ٍServerless
   network_mode             = "awsvpc"
-  cpu                      = 512
-  memory                   = 1024
-
+  cpu                      = 1024
+  memory                   = 2048
   # Role for SSM
   execution_role_arn = aws_iam_role.ecs_execution.arn
 
@@ -77,6 +76,15 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
           value = aws_elasticache_cluster.ElastiCache.cluster_address
         }
       ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/vprofile-app-docker"
+          "awslogs-region"        = data.aws_region.current.id
+          "awslogs-stream-prefix" = "tomcat"
+        }
+      }
     }
   ])
 }
@@ -89,6 +97,7 @@ resource "aws_ecs_service" "tomcat_service" {
   task_definition = aws_ecs_task_definition.tomcat_definition.arn
   desired_count   = 2
   launch_type     = "FARGATE"
+  health_check_grace_period_seconds = 300
 
   network_configuration {
     subnets          = module.vpc.private_subnets
@@ -101,4 +110,11 @@ resource "aws_ecs_service" "tomcat_service" {
     container_name   = "vproapp"
     container_port   = 8080
   }
+}
+
+
+
+resource "aws_cloudwatch_log_group" "ecs_tomcat_logs" {
+  name              = "/ecs/vprofile-app"
+  retention_in_days = 7
 }

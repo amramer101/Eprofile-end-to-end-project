@@ -37,11 +37,11 @@ variable "AWS_Zone-c" {
 ## Key Variables
 
 variable "pub_key_path" {
-  default = "bean-stack-key.pub"
+  default = "docker-githubActions.pub"
 }
 
 variable "priv_key_path" {
-  default = "bean-stack-key"
+  default = "docker-githubActions"
 }
 
 ## DataBase Services Variables
