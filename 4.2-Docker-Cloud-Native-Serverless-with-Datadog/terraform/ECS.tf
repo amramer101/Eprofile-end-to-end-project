@@ -40,7 +40,7 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
           valueFrom = "arn:aws:ssm:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:parameter/strata-ops/mysql-password"
         },
         {
-          name      = "RABBITMQ_PASSWORD"
+          name      = "RABBITMQ_PASS"
           valueFrom = "arn:aws:ssm:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:parameter/strata-ops/rabbitmq-password"
         }
       ]
@@ -63,12 +63,12 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
           value = split(":", split("//", aws_mq_broker.RabbitMQ.instances[0].endpoints[0])[1])[0]
         },
         {
-          name  = "RABBITMQ_USERNAME"
+          name  = "RABBITMQ_USER"
           value = var.rmq_user
         },
         {
           name  = "RABBITMQ_PORT"
-          value = "5672"
+          value = "5671"
         },
         {
           name  = "MEMCACHED_HOSTNAME"
