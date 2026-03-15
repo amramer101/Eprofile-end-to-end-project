@@ -37,7 +37,7 @@ resource "aws_instance" "bastion" {
   user_data = base64encode(templatefile("${path.module}/templates/bastion-init.sh", {
     RDS_ENDPOINT = aws_db_instance.RDS.address
     DB_USER      = var.db_user_name
-    DB_PASSWORD  = aws_ssm_parameter.mysql_password.value
+    DB_PASSWORD  = random_password.db_password.result
     DB_NAME      = var.db_name
   }))
 
