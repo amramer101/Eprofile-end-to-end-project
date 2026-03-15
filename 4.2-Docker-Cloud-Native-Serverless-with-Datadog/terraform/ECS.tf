@@ -5,7 +5,7 @@ resource "aws_ecs_cluster" "tomcat_cluster" {
 
   setting {
     name  = "containerInsights"
-    value = "enabled" # ممتاز جداً عشان Datadog والـ Monitoring
+    value = "enabled"
   }
 }
 
@@ -19,12 +19,12 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
   memory                   = 1024
   
   # Role for SSM
-  # execution_role_arn       = aws_iam_role.ecs_execution_role.arn 
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn 
 
   container_definitions = jsonencode([
     {
       name      = "vproapp"
-      image     = "amrmamer/vprofileapp:latest" # إيمدج التوم كات بتاعتك
+      image     = "amrmamer/vprofileapp:latest"
       cpu       = 512
       memory    = 1024
       essential = true
