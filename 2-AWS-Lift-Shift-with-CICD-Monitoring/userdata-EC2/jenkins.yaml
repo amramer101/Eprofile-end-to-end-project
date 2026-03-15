@@ -88,7 +88,7 @@ credentials:
   system:
     domainCredentials:
     - credentials:
-      # 1. Nexus Credentials
+      # Nexus Credentials
       - usernamePassword:
           id: "nexuslogin"
           scope: GLOBAL
@@ -96,21 +96,21 @@ credentials:
           password: "admin123"
           description: "Nexus Authentication"
 
-      # 2. Slack Token
+      # Slack Token
       - string:
           scope: GLOBAL
           id: "Slack-token"
           secret: "${SLACK_TOKEN}"
           description: "Slack Integration Token"
 
-      # 3. SonarQube Token
+      # SonarQube Token
       - string:
           scope: GLOBAL
           id: "sonartoken"
           secret: "${SONAR_TOKEN}"
           description: "SonarQube Token"
 
-      # 3. NVD Token
+      # NVD Token
       - string:
           scope: GLOBAL
           id: "nvd-api-key"
