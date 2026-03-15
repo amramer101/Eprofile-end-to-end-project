@@ -23,7 +23,7 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
   container_definitions = jsonencode([
     {
       name      = "vproapp"
-      image     = "amrmamer/vprofileapp:latest"
+      image     = "amrmamer/vprofileapp:v2"
       cpu       = 512
       memory    = 1024
       essential = true
@@ -43,7 +43,6 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
           name      = "RABBITMQ_PASSWORD"
           valueFrom = "arn:aws:ssm:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:parameter/strata-ops/rabbitmq-password"
         }
-
       ]
 
       environment = [
@@ -80,7 +79,7 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/vprofile-app-docker"
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs_tomcat_logs.name
           "awslogs-region"        = data.aws_region.current.id
           "awslogs-stream-prefix" = "tomcat"
         }
@@ -92,11 +91,11 @@ resource "aws_ecs_task_definition" "tomcat_definition" {
 ## (ECS Service) --------------------------------------------
 
 resource "aws_ecs_service" "tomcat_service" {
-  name            = "eprofile-tomcat-svc"
-  cluster         = aws_ecs_cluster.tomcat_cluster.id
-  task_definition = aws_ecs_task_definition.tomcat_definition.arn
-  desired_count   = 2
-  launch_type     = "FARGATE"
+  name                              = "eprofile-tomcat-svc"
+  cluster                           = aws_ecs_cluster.tomcat_cluster.id
+  task_definition                   = aws_ecs_task_definition.tomcat_definition.arn
+  desired_count                     = 2
+  launch_type                       = "FARGATE"
   health_check_grace_period_seconds = 300
 
   network_configuration {

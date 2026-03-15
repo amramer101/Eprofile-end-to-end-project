@@ -5,7 +5,7 @@ module "alb" {
   name    = "eprofile-alb"
   vpc_id  = module.vpc.vpc_id
   subnets = module.vpc.public_subnets
-  
+
   security_group_ingress_rules = {
     all_http = {
       from_port   = 80
@@ -27,10 +27,10 @@ module "alb" {
 
   target_groups = {
     tomcat_tg = {
-      name_prefix = "vpro-"
-      protocol    = "HTTP"
-      port        = 8080
-      target_type = "ip"
+      name_prefix       = "vpro-"
+      protocol          = "HTTP"
+      port              = 8080
+      target_type       = "ip"
       create_attachment = false
 
       health_check = {
